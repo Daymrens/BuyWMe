@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
-import 'package:uuid/uuid.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../providers/shopping_list_provider.dart';
 import '../../models/shopping_list.dart';
@@ -347,25 +346,28 @@ class HomeScreen extends ConsumerWidget {
 
   void _createQuickCart(BuildContext context, WidgetRef ref, String name) {
     ref.read(shoppingListProvider.notifier).addList(name);
-    
+    final router = GoRouter.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+
     Navigator.pop(context);
-    
-    // Give the provider time to update
+
     Future.delayed(const Duration(milliseconds: 100), () {
       final lists = ref.read(shoppingListProvider);
       final newList = lists.where((list) => list.name == name).lastOrNull;
-      
-      ScaffoldMessenger.of(context).showSnackBar(
+
+      messenger.showSnackBar(
         SnackBar(
           content: Text('$name created!'),
           backgroundColor: AppTheme.primaryGreen,
-          action: newList != null ? SnackBarAction(
-            label: 'Open',
-            textColor: Colors.white,
-            onPressed: () {
-              context.go('/cart/${newList.id}');
-            },
-          ) : null,
+          action: newList != null
+              ? SnackBarAction(
+                  label: 'Open',
+                  textColor: Colors.white,
+                  onPressed: () {
+                    router.go('/cart/${newList.id}');
+                  },
+                )
+              : null,
         ),
       );
     });

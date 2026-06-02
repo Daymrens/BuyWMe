@@ -936,7 +936,7 @@ class ListsScreen extends ConsumerWidget {
               if (controller.text.isNotEmpty) {
                 cart.name = controller.text;
                 cart.save();
-                ref.read(shoppingListProvider.notifier).state = [...ref.read(shoppingListProvider)];
+                ref.read(shoppingListProvider.notifier).refreshLists();
                 Navigator.pop(context);
               }
             },
@@ -973,7 +973,7 @@ class ListsScreen extends ConsumerWidget {
               final budget = controller.text.isEmpty ? null : double.tryParse(controller.text);
               cart.budget = budget;
               cart.save();
-              ref.read(shoppingListProvider.notifier).state = [...ref.read(shoppingListProvider)];
+              ref.read(shoppingListProvider.notifier).refreshLists();
               Navigator.pop(context);
             },
             child: const Text('Save'),

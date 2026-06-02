@@ -484,8 +484,14 @@ class _AddItemCardSheetState extends ConsumerState<AddItemCardSheet>
                         label: 'Receipt',
                         onTap: () {
                           HapticFeedback.mediumImpact();
+                          final callback = widget.onScanReceipt;
+                          final cartId = widget.cartId;
                           Navigator.pop(context);
-                          widget.onScanReceipt?.call(context, ref, widget.cartId);
+                          if (callback != null) {
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              callback(context, ref, cartId);
+                            });
+                          }
                         },
                       ),
                     ),
@@ -496,8 +502,14 @@ class _AddItemCardSheetState extends ConsumerState<AddItemCardSheet>
                         label: 'Barcode',
                         onTap: () {
                           HapticFeedback.mediumImpact();
+                          final callback = widget.onScanBarcode;
+                          final cartId = widget.cartId;
                           Navigator.pop(context);
-                          widget.onScanBarcode?.call(context, ref, widget.cartId);
+                          if (callback != null) {
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              callback(context, ref, cartId);
+                            });
+                          }
                         },
                       ),
                     ),

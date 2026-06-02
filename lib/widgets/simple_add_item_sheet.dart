@@ -7,7 +7,6 @@ import '../models/shopping_item.dart';
 import '../providers/shopping_list_provider.dart';
 import '../providers/favorite_provider.dart';
 import '../theme/app_theme.dart';
-import 'glassmorphic_card.dart';
 
 /// Simple, user-friendly Add Item bottom sheet
 /// Clean design with easy navigation and quick actions
@@ -242,9 +241,13 @@ class _SimpleAddItemSheetState extends ConsumerState<SimpleAddItemSheet> {
           ),
           onTap: () {
             HapticFeedback.mediumImpact();
+            final callback = widget.onScanBarcode;
+            final cartId = widget.cartId;
             Navigator.pop(context);
-            if (widget.onScanBarcode != null) {
-              widget.onScanBarcode!(context, ref, widget.cartId);
+            if (callback != null) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                callback(context, ref, cartId);
+              });
             }
           },
         ).animate().fadeIn(delay: 100.ms).slideX(begin: -0.2),
@@ -261,9 +264,13 @@ class _SimpleAddItemSheetState extends ConsumerState<SimpleAddItemSheet> {
           ),
           onTap: () {
             HapticFeedback.mediumImpact();
+            final callback = widget.onScanReceipt;
+            final cartId = widget.cartId;
             Navigator.pop(context);
-            if (widget.onScanReceipt != null) {
-              widget.onScanReceipt!(context, ref, widget.cartId);
+            if (callback != null) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                callback(context, ref, cartId);
+              });
             }
           },
         ).animate().fadeIn(delay: 150.ms).slideX(begin: -0.2),

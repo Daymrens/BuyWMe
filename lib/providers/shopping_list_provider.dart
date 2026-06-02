@@ -20,6 +20,10 @@ class ShoppingListNotifier extends StateNotifier<List<ShoppingList>> {
     state = _box.values.toList();
   }
 
+  void refreshLists() {
+    _loadLists();
+  }
+
   void addList(String name, {double? budget, String? storeId, String? storeName}) {
     final list = ShoppingList(
       id: _uuid.v4(),
@@ -97,8 +101,9 @@ class ShoppingListNotifier extends StateNotifier<List<ShoppingList>> {
   void toggleItem(String listId, String itemId) {
     final list = _box.get(listId);
     if (list != null) {
-      final item = list.items.firstWhere((i) => i.id == itemId);
-      item.isDone = !item.isDone;
+      final index = list.items.indexWhere((i) => i.id == itemId);
+      if (index == -1) return;
+      list.items[index].isDone = !list.items[index].isDone;
       list.save();
       _loadLists();
     }

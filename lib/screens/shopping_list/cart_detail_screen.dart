@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -17,7 +17,6 @@ import '../../widgets/animated_checkmark.dart';
 import '../../widgets/simple_add_item_sheet.dart';
 import '../../theme/app_theme.dart';
 import '../../config/api_config.dart';
-import '../../debug/agent_log.dart';
 
 class CartDetailScreen extends ConsumerWidget {
   final String cartId;
@@ -27,7 +26,28 @@ class CartDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final lists = ref.watch(shoppingListProvider);
-    final cart = lists.firstWhere((list) => list.id == cartId);
+    final cartMatches = lists.where((list) => list.id == cartId);
+    if (cartMatches.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Cart')),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.shopping_cart_outlined, size: 64, color: Colors.grey),
+              const SizedBox(height: 16),
+              const Text('This cart no longer exists'),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Go Back'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    final cart = cartMatches.first;
     final currencyFormat = NumberFormat.currency(locale: 'en_PH', symbol: '₱');
     
     final total = cart.items.fold<double>(
@@ -370,701 +390,10 @@ class CartDetailScreen extends ConsumerWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => SimpleAddItemSheet(
+      builder: (_) => SimpleAddItemSheet(
         cartId: cartId,
-        onScanBarcode: _showBarcodeScanner,
-        onScanReceipt: _showImageCapture,
-      ),
-    );
-  }
-
-  // OLD tab-based UI (kept for reference, can be removed)
-  void _showAddItemSheet(BuildContext context, WidgetRef ref, String cartId) {
-    final nameController = TextEditingController();
-    final quantityController = TextEditingController(text: '1');
-    final priceController = TextEditingController();
-    String selectedUnit = 'pcs';
-    String? selectedCommonItem;
-    bool isCustomItem = false;
-    bool isScanMode = false;
-    String? selectedCategory;
-
-    final commonItems = [
-      {'name': 'Rice', 'unit': 'kg', 'price': 50.0, 'category': 'Grains', 'icon': '🌾'},
-      {'name': 'Eggs', 'unit': 'dozen', 'price': 120.0, 'category': 'Dairy', 'icon': '🥚'},
-      {'name': 'Milk', 'unit': 'L', 'price': 90.0, 'category': 'Dairy', 'icon': '🥛'},
-      {'name': 'Bread', 'unit': 'pcs', 'price': 50.0, 'category': 'Bakery', 'icon': '🍞'},
-      {'name': 'Chicken', 'unit': 'kg', 'price': 200.0, 'category': 'Meat', 'icon': '🍗'},
-      {'name': 'Pork', 'unit': 'kg', 'price': 250.0, 'category': 'Meat', 'icon': '🥓'},
-      {'name': 'Fish', 'unit': 'kg', 'price': 180.0, 'category': 'Seafood', 'icon': '🐟'},
-      {'name': 'Tomatoes', 'unit': 'kg', 'price': 60.0, 'category': 'Vegetables', 'icon': '🍅'},
-      {'name': 'Onions', 'unit': 'kg', 'price': 80.0, 'category': 'Vegetables', 'icon': '🧅'},
-      {'name': 'Potatoes', 'unit': 'kg', 'price': 70.0, 'category': 'Vegetables', 'icon': '🥔'},
-      {'name': 'Carrots', 'unit': 'kg', 'price': 65.0, 'category': 'Vegetables', 'icon': '🥕'},
-      {'name': 'Cabbage', 'unit': 'kg', 'price': 55.0, 'category': 'Vegetables', 'icon': '🥬'},
-      {'name': 'Lettuce', 'unit': 'pcs', 'price': 40.0, 'category': 'Vegetables', 'icon': '🥗'},
-      {'name': 'Cooking Oil', 'unit': 'L', 'price': 150.0, 'category': 'Pantry', 'icon': '🛢️'},
-      {'name': 'Sugar', 'unit': 'kg', 'price': 80.0, 'category': 'Pantry', 'icon': '🍬'},
-      {'name': 'Salt', 'unit': 'pack', 'price': 20.0, 'category': 'Pantry', 'icon': '🧂'},
-      {'name': 'Coffee', 'unit': 'pack', 'price': 150.0, 'category': 'Beverages', 'icon': '☕'},
-      {'name': 'Tea', 'unit': 'pack', 'price': 100.0, 'category': 'Beverages', 'icon': '🍵'},
-      {'name': 'Instant Noodles', 'unit': 'pack', 'price': 15.0, 'category': 'Instant', 'icon': '🍜'},
-      {'name': 'Soy Sauce', 'unit': 'bottle', 'price': 45.0, 'category': 'Condiments', 'icon': '🥫'},
-      {'name': 'Vinegar', 'unit': 'bottle', 'price': 35.0, 'category': 'Condiments', 'icon': '🧴'},
-      {'name': 'Ketchup', 'unit': 'bottle', 'price': 60.0, 'category': 'Condiments', 'icon': '🍅'},
-      {'name': 'Butter', 'unit': 'pack', 'price': 120.0, 'category': 'Dairy', 'icon': '🧈'},
-      {'name': 'Cheese', 'unit': 'pack', 'price': 150.0, 'category': 'Dairy', 'icon': '🧀'},
-      {'name': 'Yogurt', 'unit': 'pack', 'price': 80.0, 'category': 'Dairy', 'icon': '🥛'},
-      {'name': 'Banana', 'unit': 'kg', 'price': 70.0, 'category': 'Fruits', 'icon': '🍌'},
-      {'name': 'Apple', 'unit': 'kg', 'price': 150.0, 'category': 'Fruits', 'icon': '🍎'},
-      {'name': 'Orange', 'unit': 'kg', 'price': 120.0, 'category': 'Fruits', 'icon': '🍊'},
-      {'name': 'Mango', 'unit': 'kg', 'price': 100.0, 'category': 'Fruits', 'icon': '🥭'},
-      {'name': 'Watermelon', 'unit': 'pcs', 'price': 80.0, 'category': 'Fruits', 'icon': '🍉'},
-    ];
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-        ),
-        child: StatefulBuilder(
-          builder: (context, setState) => DraggableScrollableSheet(
-            initialChildSize: 0.75,
-            minChildSize: 0.5,
-            maxChildSize: 0.95,
-            builder: (context, scrollController) => GlassmorphicCard(
-            borderRadius: 30,
-            margin: EdgeInsets.zero,
-            padding: const EdgeInsets.all(24),
-            child: ListView(
-              controller: scrollController,
-              children: [
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.withOpacity(0.3),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        gradient: AppTheme.primaryGradient,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Icon(
-                        Icons.add_shopping_cart,
-                        color: Colors.white,
-                        size: 24,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      'Add Item',
-                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                
-                // Enhanced tab selector with icons
-                Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? Colors.grey.withOpacity(0.1)
-                        : Colors.grey.withOpacity(0.05),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: _buildTabButton(
-                          context,
-                          icon: Icons.inventory_2,
-                          label: 'Common',
-                          isSelected: !isCustomItem && !isScanMode,
-                          onTap: () {
-                            HapticFeedback.lightImpact();
-                            setState(() {
-                              isCustomItem = false;
-                              isScanMode = false;
-                              nameController.clear();
-                            });
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: _buildTabButton(
-                          context,
-                          icon: Icons.qr_code_scanner,
-                          label: 'Scan',
-                          isSelected: isScanMode,
-                          onTap: () {
-                            HapticFeedback.lightImpact();
-                            setState(() {
-                              isScanMode = true;
-                              isCustomItem = false;
-                            });
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: _buildTabButton(
-                          context,
-                          icon: Icons.edit,
-                          label: 'Custom',
-                          isSelected: isCustomItem,
-                          onTap: () {
-                            HapticFeedback.lightImpact();
-                            setState(() {
-                              isCustomItem = true;
-                              isScanMode = false;
-                              selectedCommonItem = null;
-                            });
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 24),
-                
-                // Category filter chips (only show for common items)
-                if (!isCustomItem && !isScanMode) ...[
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        _buildCategoryChip(
-                          context,
-                          'All',
-                          Icons.apps,
-                          Colors.grey,
-                          selectedCategory == null,
-                          () {
-                            HapticFeedback.lightImpact();
-                            setState(() => selectedCategory = null);
-                          },
-                        ),
-                        _buildCategoryChip(
-                          context,
-                          'Dairy',
-                          Icons.egg,
-                          Colors.orange,
-                          selectedCategory == 'Dairy',
-                          () {
-                            HapticFeedback.lightImpact();
-                            setState(() => selectedCategory = 'Dairy');
-                          },
-                        ),
-                        _buildCategoryChip(
-                          context,
-                          'Vegetables',
-                          Icons.eco,
-                          Colors.green,
-                          selectedCategory == 'Vegetables',
-                          () {
-                            HapticFeedback.lightImpact();
-                            setState(() => selectedCategory = 'Vegetables');
-                          },
-                        ),
-                        _buildCategoryChip(
-                          context,
-                          'Fruits',
-                          Icons.apple,
-                          Colors.red,
-                          selectedCategory == 'Fruits',
-                          () {
-                            HapticFeedback.lightImpact();
-                            setState(() => selectedCategory = 'Fruits');
-                          },
-                        ),
-                        _buildCategoryChip(
-                          context,
-                          'Meat',
-                          Icons.restaurant,
-                          Colors.brown,
-                          selectedCategory == 'Meat',
-                          () {
-                            HapticFeedback.lightImpact();
-                            setState(() => selectedCategory = 'Meat');
-                          },
-                        ),
-                        _buildCategoryChip(
-                          context,
-                          'Pantry',
-                          Icons.kitchen,
-                          Colors.purple,
-                          selectedCategory == 'Pantry',
-                          () {
-                            HapticFeedback.lightImpact();
-                            setState(() => selectedCategory = 'Pantry');
-                          },
-                        ),
-                        _buildCategoryChip(
-                          context,
-                          'Beverages',
-                          Icons.local_cafe,
-                          Colors.blue,
-                          selectedCategory == 'Beverages',
-                          () {
-                            HapticFeedback.lightImpact();
-                            setState(() => selectedCategory = 'Beverages');
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                ],
-                
-                if (isScanMode) ...[
-                  // Scan options
-                  GlassmorphicCard(
-                    margin: EdgeInsets.zero,
-                    child: Column(
-                      children: [
-                        ListTile(
-                          leading: Container(
-                            width: 48,
-                            height: 48,
-                            decoration: BoxDecoration(
-                              color: Colors.blue.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: const Icon(Icons.qr_code_scanner, color: Colors.blue),
-                          ),
-                          title: const Text('Scan Barcode'),
-                          subtitle: const Text('Scan product barcode'),
-                          trailing: const Icon(Icons.chevron_right),
-                          onTap: () {
-                            Navigator.pop(context);
-                            _showBarcodeScanner(context, ref, cartId);
-                          },
-                        ),
-                        const Divider(height: 1),
-                        ListTile(
-                          leading: Container(
-                            width: 48,
-                            height: 48,
-                            decoration: BoxDecoration(
-                              color: Colors.purple.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: const Icon(Icons.camera_alt, color: Colors.purple),
-                          ),
-                          title: const Text('Capture Receipt'),
-                          subtitle: const Text('Auto-detect price & name'),
-                          trailing: const Icon(Icons.chevron_right),
-                          onTap: () {
-                            Navigator.pop(context);
-                            _showImageCapture(context, ref, cartId);
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ] else if (!isCustomItem) ...[
-                  // Searchable dropdown for common items
-                  Autocomplete<Map<String, dynamic>>(
-                    optionsBuilder: (TextEditingValue textEditingValue) {
-                      var filteredItems = commonItems;
-                      
-                      // Filter by category if selected
-                      if (selectedCategory != null) {
-                        filteredItems = filteredItems.where((item) {
-                          return item['category'] == selectedCategory;
-                        }).toList();
-                      }
-                      
-                      // Filter by search text
-                      if (textEditingValue.text.isEmpty) {
-                        return filteredItems;
-                      }
-                      return filteredItems.where((item) {
-                        return item['name']
-                            .toString()
-                            .toLowerCase()
-                            .contains(textEditingValue.text.toLowerCase());
-                      });
-                    },
-                    displayStringForOption: (item) => item['name'] as String,
-                    onSelected: (item) {
-                      setState(() {
-                        selectedCommonItem = item['name'] as String;
-                        nameController.text = item['name'] as String;
-                        selectedUnit = item['unit'] as String;
-                        priceController.text = (item['price'] as double).toString();
-                      });
-                    },
-                    fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
-                      return TextField(
-                        controller: controller,
-                        focusNode: focusNode,
-                        decoration: InputDecoration(
-                          labelText: 'Search Items',
-                          hintText: 'Type to search...',
-                          prefixIcon: const Icon(Icons.search),
-                          suffixIcon: controller.text.isNotEmpty
-                              ? IconButton(
-                                  icon: const Icon(Icons.clear),
-                                  onPressed: () {
-                                    controller.clear();
-                                    setState(() {
-                                      selectedCommonItem = null;
-                                      nameController.clear();
-                                      priceController.clear();
-                                    });
-                                  },
-                                )
-                              : null,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          filled: true,
-                        ),
-                      );
-                    },
-                    optionsViewBuilder: (context, onSelected, options) {
-                      return Align(
-                        alignment: Alignment.topLeft,
-                        child: Material(
-                          elevation: 4,
-                          borderRadius: BorderRadius.circular(15),
-                          child: Container(
-                            constraints: const BoxConstraints(maxHeight: 300),
-                            width: MediaQuery.of(context).size.width - 80,
-                            child: ListView.builder(
-                              padding: EdgeInsets.zero,
-                              shrinkWrap: true,
-                              itemCount: options.length,
-                              itemBuilder: (context, index) {
-                                final item = options.elementAt(index);
-                                return ListTile(
-                                  leading: Container(
-                                    width: 40,
-                                    height: 40,
-                                    decoration: BoxDecoration(
-                                      color: AppTheme.primaryGreen.withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: const Icon(
-                                      Icons.shopping_basket,
-                                      color: AppTheme.primaryGreen,
-                                      size: 20,
-                                    ),
-                                  ),
-                                  title: Text(item['name'] as String),
-                                  subtitle: Text(
-                                    '${item['category']} • ₱${(item['price'] as double).toStringAsFixed(2)}/${item['unit']}',
-                                    style: const TextStyle(fontSize: 12),
-                                  ),
-                                  onTap: () {
-                                    onSelected(item);
-                                  },
-                                );
-                              },
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ] else ...[
-                  // Custom item name input
-                  TextField(
-                    controller: nameController,
-                    decoration: InputDecoration(
-                      labelText: 'Item Name',
-                      hintText: 'e.g., Custom Product',
-                      prefixIcon: const Icon(Icons.edit),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      filled: true,
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: quantityController,
-                        decoration: InputDecoration(
-                          labelText: 'Quantity',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          filled: true,
-                        ),
-                        keyboardType: TextInputType.number,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: DropdownButtonFormField<String>(
-                        value: selectedUnit,
-                        decoration: InputDecoration(
-                          labelText: 'Unit',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          filled: true,
-                        ),
-                        items: const [
-                          DropdownMenuItem(value: 'pcs', child: Text('pcs')),
-                          DropdownMenuItem(value: 'kg', child: Text('kg')),
-                          DropdownMenuItem(value: 'g', child: Text('g')),
-                          DropdownMenuItem(value: 'L', child: Text('L')),
-                          DropdownMenuItem(value: 'mL', child: Text('mL')),
-                          DropdownMenuItem(value: 'pack', child: Text('pack')),
-                          DropdownMenuItem(value: 'box', child: Text('box')),
-                          DropdownMenuItem(value: 'dozen', child: Text('dozen')),
-                        ],
-                        onChanged: (value) {
-                          setState(() => selectedUnit = value!);
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: priceController,
-                  decoration: InputDecoration(
-                    labelText: 'Price (₱)',
-                    prefixText: '₱ ',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    filled: true,
-                  ),
-                  keyboardType: TextInputType.number,
-                ),
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => Navigator.pop(context),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                        ),
-                        child: const Text('Cancel'),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          if (nameController.text.isNotEmpty &&
-                              quantityController.text.isNotEmpty &&
-                              priceController.text.isNotEmpty) {
-                            HapticFeedback.mediumImpact();
-                            final item = ShoppingItem(
-                              id: const Uuid().v4(),
-                              productId: const Uuid().v4(),
-                              name: nameController.text,
-                              quantity: double.parse(quantityController.text),
-                              unit: selectedUnit,
-                              estimatedPrice: double.parse(priceController.text),
-                            );
-                            ref.read(shoppingListProvider.notifier).addItem(cartId, item);
-                            Navigator.pop(context);
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          backgroundColor: AppTheme.primaryGreen,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                        ),
-                        child: const Text('Add'),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    ),
-    );
-  }
-
-  Widget _buildScanOptionCard(
-    BuildContext context, {
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required Gradient gradient,
-    String? badge,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: gradient,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Stack(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Row(
-                children: [
-                  Container(
-                    width: 56,
-                    height: 56,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Icon(
-                      icon,
-                      color: Colors.white,
-                      size: 28,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          subtitle,
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.9),
-                            fontSize: 13,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Icon(
-                    Icons.arrow_forward_ios,
-                    color: Colors.white.withOpacity(0.7),
-                    size: 18,
-                  ),
-                ],
-              ),
-            ),
-            if (badge != null)
-              Positioned(
-                top: 12,
-                right: 12,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    badge,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTabButton(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-        decoration: BoxDecoration(
-          gradient: isSelected ? AppTheme.primaryGradient : null,
-          color: isSelected ? null : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: AppTheme.primaryGreen.withOpacity(0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : null,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 18,
-              color: isSelected
-                  ? Colors.white
-                  : Theme.of(context).textTheme.bodyMedium?.color,
-            ),
-            const SizedBox(width: 6),
-            Flexible(
-              child: Text(
-                label,
-                style: TextStyle(
-                  color: isSelected
-                      ? Colors.white
-                      : Theme.of(context).textTheme.bodyMedium?.color,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                  fontSize: 13,
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
-        ),
+        onScanBarcode: (_, sheetRef, id) => _showBarcodeScanner(context, sheetRef, id),
+        onScanReceipt: (_, sheetRef, id) => _showImageCapture(context, sheetRef, id),
       ),
     );
   }
@@ -1328,7 +657,7 @@ class CartDetailScreen extends ConsumerWidget {
                 HapticFeedback.lightImpact();
                 cart.name = nameController.text;
                 cart.save();
-                ref.read(shoppingListProvider.notifier).state = [...ref.read(shoppingListProvider)];
+                ref.read(shoppingListProvider.notifier).refreshLists();
                 Navigator.pop(context);
               }
             },
@@ -1368,7 +697,7 @@ class CartDetailScreen extends ConsumerWidget {
                   : double.tryParse(budgetController.text);
               cart.budget = budget;
               cart.save();
-              ref.read(shoppingListProvider.notifier).state = [...ref.read(shoppingListProvider)];
+              ref.read(shoppingListProvider.notifier).refreshLists();
               Navigator.pop(context);
             },
             child: const Text('Save'),
@@ -1412,12 +741,16 @@ class CartDetailScreen extends ConsumerWidget {
 
 
   void _showBarcodeScanner(BuildContext context, WidgetRef ref, String cartId) {
+    final cartContext = context;
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => _BarcodeScannerScreen(
+        builder: (_) => _BarcodeScannerScreen(
           onBarcodeDetected: (barcode) {
-            // Simulate barcode lookup
-            _showBarcodeResultDialog(context, ref, cartId, barcode);
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (cartContext.mounted) {
+                _showBarcodeResultDialog(cartContext, ref, cartId, barcode);
+              }
+            });
           },
         ),
       ),
@@ -1580,55 +913,24 @@ class CartDetailScreen extends ConsumerWidget {
   }
 
   void _showImageCapture(BuildContext context, WidgetRef ref, String cartId) {
-    // Capture the provider notifier before navigation
     final listNotifier = ref.read(shoppingListProvider.notifier);
-
-    // #region agent log
-    AgentDebugLog.log(
-      'cart_detail_screen.dart:_showImageCapture',
-      'opening image capture',
-      data: {'cartId': cartId, ...AgentDebugLog.navSnapshot(context)},
-      hypothesisId: 'A',
-    );
-    // #endregion
+    final cartContext = context;
 
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => _ImageCaptureScreen(
+        builder: (_) => _ImageCaptureScreen(
           onImageCaptured: (detectedText) {
-            // #region agent log
-            AgentDebugLog.log(
-              'cart_detail_screen.dart:onImageCaptured',
-              'callback before second pop',
-              data: {
-                'cartId': cartId,
-                'detectedKeys': detectedText.keys.toList(),
-                ...AgentDebugLog.navSnapshot(context),
-              },
-              hypothesisId: 'A',
-            );
-            // #endregion
-            // Pop back to cart screen
-            Navigator.of(context).pop();
-            // #region agent log
-            AgentDebugLog.log(
-              'cart_detail_screen.dart:onImageCaptured',
-              'callback after second pop',
-              data: {
-                'cartId': cartId,
-                ...AgentDebugLog.navSnapshot(context),
-              },
-              hypothesisId: 'A',
-            );
-            // #endregion
-            // Show dialog with the captured notifier
-            _showImageResultDialogWithNotifier(
-              context,
-              ref,
-              listNotifier,
-              cartId,
-              detectedText,
-            );
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (cartContext.mounted) {
+                _showImageResultDialogWithNotifier(
+                  cartContext,
+                  ref,
+                  listNotifier,
+                  cartId,
+                  detectedText,
+                );
+              }
+            });
           },
         ),
       ),
@@ -1650,21 +952,6 @@ class CartDetailScreen extends ConsumerWidget {
     final priceController = TextEditingController(text: detectedText['price'] ?? '0');
     String selectedUnit = 'pcs';
     final debugText = detectedText['_debug_text'] ?? '';
-
-    // #region agent log
-    AgentDebugLog.log(
-      'cart_detail_screen.dart:_showImageResultDialogWithNotifier',
-      'showing result dialog',
-      data: {
-        'cartId': cartId,
-        'name': detectedText['name'],
-        'price': detectedText['price'],
-        'source': detectedText['_source'],
-        ...AgentDebugLog.navSnapshot(context),
-      },
-      hypothesisId: 'B',
-    );
-    // #endregion
 
     showDialog(
       context: context,
@@ -1855,20 +1142,6 @@ class CartDetailScreen extends ConsumerWidget {
                 // Use the captured notifier instead of ref
                 listNotifier.addItem(cartId, item);
 
-                // #region agent log
-                AgentDebugLog.log(
-                  'cart_detail_screen.dart:addItem',
-                  'item added via listNotifier',
-                  data: {
-                    'cartId': cartId,
-                    'itemName': name,
-                    'parsedPrice': parsedPrice,
-                    'parsedQuantity': parsedQuantity,
-                  },
-                  hypothesisId: 'C',
-                );
-                // #endregion
-
                 print('Item added to provider');
                 
                 // Close dialog
@@ -1945,59 +1218,6 @@ class CartDetailScreen extends ConsumerWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-
-  Widget _buildCategoryChip(
-    BuildContext context,
-    String label,
-    IconData icon,
-    Color color,
-    bool isSelected,
-    VoidCallback onTap,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 8),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(20),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          decoration: BoxDecoration(
-            color: isSelected
-                ? color.withOpacity(0.2)
-                : Theme.of(context).brightness == Brightness.dark
-                    ? Colors.white.withOpacity(0.05)
-                    : Colors.grey.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: isSelected ? color : Colors.transparent,
-              width: 2,
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                icon,
-                size: 18,
-                color: isSelected ? color : Colors.grey,
-              ),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: TextStyle(
-                  color: isSelected ? color : Colors.grey,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                  fontSize: 14,
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
@@ -2127,30 +1347,8 @@ class _ImageCaptureScreenState extends State<_ImageCaptureScreen> {
       // Fallback to ML Kit + regex if Claude fails or not configured
       result ??= await _extractWithMlKit(image.path);
 
-      // #region agent log
-      AgentDebugLog.log(
-        'cart_detail_screen.dart:_captureAndProcessImage',
-        'OCR complete (camera)',
-        data: {
-          'name': result['name'],
-          'price': result['price'],
-          'source': result['_source'],
-          ...AgentDebugLog.navSnapshot(context),
-        },
-        hypothesisId: 'D',
-      );
-      // #endregion
-
       if (mounted) {
         HapticFeedback.mediumImpact();
-        // #region agent log
-        AgentDebugLog.log(
-          'cart_detail_screen.dart:_captureAndProcessImage',
-          'capture screen before first pop',
-          data: AgentDebugLog.navSnapshot(context),
-          hypothesisId: 'A',
-        );
-        // #endregion
         Navigator.pop(context);
         widget.onImageCaptured(result);
       }
@@ -2235,8 +1433,15 @@ Respond ONLY with valid JSON, no explanation:
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final text = (data['content'] as List)
-            .firstWhere((b) => b['type'] == 'text')['text'] as String;
+        final content = data['content'] as List?;
+        if (content == null || content.isEmpty) return null;
+
+        final textBlock = content.cast<Map<String, dynamic>>().where(
+          (block) => block['type'] == 'text' && block['text'] != null,
+        );
+        if (textBlock.isEmpty) return null;
+
+        final text = textBlock.first['text'] as String;
 
         // Strip markdown fences if present
         final clean = text
@@ -2327,36 +1532,36 @@ Respond ONLY with valid JSON, no explanation:
 
     String? extractedPrice;
 
-    // Helper — validates a parsed price is in realistic PH range
+    // Helper â€” validates a parsed price is in realistic PH range
     bool isValidPrice(double val) => val >= 5.0 && val <= 50000.0;
 
-    // Normalize: swap comma-decimal European style → dot
+    // Normalize: swap comma-decimal European style â†’ dot
     String normalizeDecimal(String s) => s.replaceAll(',', '.');
 
-    // Priority 1 — ₱ or P followed by digits WITH decimals
+    // Priority 1 â€” ₱ or P followed by digits WITH decimals
     // e.g. ₱85.00 | P 120.50 | ₱ 1,250.00
     final p1 = RegExp(r'[₱P]\s*([\d,]{1,7}\.\d{2})', caseSensitive: false);
 
-    // Priority 2 — keyword labels + optional ₱/P + price
+    // Priority 2 â€” keyword labels + optional ₱/P + price
     // e.g. Price: 85.00 | Amount: ₱120 | Total 45.50
     final p2 = RegExp(
       r'(?:price|presyo|amount|total|subtotal|halaga)[\s:]*[₱P]?\s*([\d,]{1,7}(?:\.\d{2})?)',
       caseSensitive: false,
     );
 
-    // Priority 3 — ₱ or P + whole number (no decimals)
+    // Priority 3 â€” ₱ or P + whole number (no decimals)
     // e.g. ₱85 | P 150
     final p3 = RegExp(r'[₱P]\s*(\d{1,6})(?!\d|\.)', caseSensitive: false);
 
-    // Priority 4 — number followed by peso/php suffix
+    // Priority 4 â€” number followed by peso/php suffix
     // e.g. 85 pesos | 75 php
     final p4 = RegExp(
       r'(\d{1,6}(?:\.\d{2})?)\s*(?:pesos?|php)',
       caseSensitive: false,
     );
 
-    // Priority 5 — LAST RESORT: standalone decimal number
-    // e.g. 85.00 — risky, only use if nothing else matched
+    // Priority 5 â€” LAST RESORT: standalone decimal number
+    // e.g. 85.00 â€” risky, only use if nothing else matched
     final p5 = RegExp(r'\b(\d{1,4}\.\d{2})\b');
 
     for (final pattern in [p1, p2, p3, p4, p5]) {
@@ -2395,7 +1600,7 @@ Respond ONLY with valid JSON, no explanation:
       'etvwt', 'net wt', 'netwt', 'sku', 'item code', 'barcode',
     ];
 
-    // Product words that boost score — expanded for PH grocery
+    // Product words that boost score â€” expanded for PH grocery
     const productWords = [
       // English grocery basics
       'milk', 'bread', 'rice', 'egg', 'eggs', 'chicken', 'pork', 'beef',
@@ -2411,7 +1616,7 @@ Respond ONLY with valid JSON, no explanation:
       'baboy', 'baka', 'isda', 'bangus', 'tilapia', 'galunggong',
       'liempo', 'lechon', 'longganisa', 'tocino', 'tapa',
       'pandesal', 'hopia', 'polvoron', 'bibingka', 'gulaman',
-      // PH brands (partial — boosts if line contains these)
+      // PH brands (partial â€” boosts if line contains these)
       'datu', 'century', 'del monte', 'ufc', 'mama sita', 'mamasita',
       'ajinomoto', 'maggi', 'knorr', 'lucky me', 'payless', 'monde',
       'rebisco', 'fita', 'skyflakes', 'milo', 'nescafe', 'kopiko',
@@ -2444,7 +1649,7 @@ Respond ONLY with valid JSON, no explanation:
       if (codePattern.hasMatch(line)) continue; // Skip code patterns like "ETVWT. 500"
       if (skipKeywords.any((kw) => lower.contains(kw))) continue;
 
-      // Digit ratio check — skip if >60% digits (e.g. "12/25/2024", codes)
+      // Digit ratio check â€” skip if >60% digits (e.g. "12/25/2024", codes)
       final digitCount = line.replaceAll(RegExp(r'[^\d]'), '').length;
       if (line.isNotEmpty && digitCount / line.length > 0.6) continue;
 
@@ -2454,7 +1659,7 @@ Respond ONLY with valid JSON, no explanation:
       // --- Scoring ---
       int score = 0;
 
-      // Weight/volume/unit indicators — strong signal it's a product
+      // Weight/volume/unit indicators â€” strong signal it's a product
       if (RegExp(
         r'\b(\d+\s*(?:g|kg|ml|l|oz|lb|pcs|pc|pack|sachet|pouch|can|bottle|box|grams?|liters?|kilos?))\b',
         caseSensitive: false,
@@ -2463,7 +1668,7 @@ Respond ONLY with valid JSON, no explanation:
       // Mixed case = brand/product name pattern
       if (RegExp(r'[A-Z][a-z]+').hasMatch(line)) score += 5;
 
-      // Reasonable product name length (8–60 chars is ideal)
+      // Reasonable product name length (8â€“60 chars is ideal)
       if (line.length >= 8 && line.length <= 60) score += 5;
       if (line.length < 8) score -= 3;
       if (line.length > 80) score -= 5;
@@ -2471,13 +1676,13 @@ Respond ONLY with valid JSON, no explanation:
       // Contains product keywords (any match = bonus)
       if (productWords.any((w) => lower.contains(w))) score += 10;
 
-      // ALL CAPS short line — likely a label/header, slight penalty
+      // ALL CAPS short line â€” likely a label/header, slight penalty
       if (line == line.toUpperCase() && line.length < 20) score -= 3;
 
-      // Has dots — brand name pattern (e.g. "S&W", "C2")
+      // Has dots â€” brand name pattern (e.g. "S&W", "C2")
       if (line.contains('.') && !priceOnlyPattern.hasMatch(line)) score += 2;
 
-      // Starts with capital — good sign
+      // Starts with capital â€” good sign
       if (RegExp(r'^[A-Z]').hasMatch(line)) score += 3;
 
       // Contains brand names - extra boost
@@ -2543,18 +1748,18 @@ Respond ONLY with valid JSON, no explanation:
                       children: [
                         Text('For best results:', style: TextStyle(fontWeight: FontWeight.bold)),
                         SizedBox(height: 8),
-                        Text('✓ Use good lighting'),
-                        Text('✓ Hold phone steady'),
-                        Text('✓ Fill frame with price tag'),
-                        Text('✓ Keep text straight'),
-                        Text('✓ Tap to focus'),
+                        Text('âœ“ Use good lighting'),
+                        Text('âœ“ Hold phone steady'),
+                        Text('âœ“ Fill frame with price tag'),
+                        Text('âœ“ Keep text straight'),
+                        Text('âœ“ Tap to focus'),
                         SizedBox(height: 12),
                         Text('Avoid:', style: TextStyle(fontWeight: FontWeight.bold)),
                         SizedBox(height: 8),
-                        Text('✗ Blurry photos'),
-                        Text('✗ Shadows or glare'),
-                        Text('✗ Tilted angles'),
-                        Text('✗ Low light'),
+                        Text('âœ— Blurry photos'),
+                        Text('âœ— Shadows or glare'),
+                        Text('âœ— Tilted angles'),
+                        Text('âœ— Low light'),
                       ],
                     ),
                   ),
