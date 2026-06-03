@@ -69,7 +69,7 @@ class HomeScreen extends ConsumerWidget {
                               borderRadius: BorderRadius.circular(15),
                               boxShadow: [
                                 BoxShadow(
-                                  color: AppTheme.primaryGreen.withOpacity(0.3),
+                                  color: AppTheme.primaryGreen.withValues(alpha: 0.3),
                                   blurRadius: 15,
                                   offset: const Offset(0, 5),
                                 ),
@@ -154,7 +154,7 @@ class HomeScreen extends ConsumerWidget {
                       title: 'New List',
                       subtitle: 'Create shopping list',
                       gradient: LinearGradient(
-                        colors: [AppTheme.primaryGreen, AppTheme.primaryGreen.withOpacity(0.7)],
+                        colors: [AppTheme.primaryGreen, AppTheme.primaryGreen.withValues(alpha: 0.7)],
                       ),
                       onTap: () {
                         HapticFeedback.mediumImpact();
@@ -168,7 +168,7 @@ class HomeScreen extends ConsumerWidget {
                       title: 'Scan Receipt',
                       subtitle: 'Quick item add',
                       gradient: LinearGradient(
-                        colors: [Colors.purple, Colors.purple.withOpacity(0.7)],
+                        colors: [Colors.purple, Colors.purple.withValues(alpha: 0.7)],
                       ),
                       onTap: () {
                         HapticFeedback.mediumImpact();
@@ -182,7 +182,7 @@ class HomeScreen extends ConsumerWidget {
                       title: 'Price Insights',
                       subtitle: 'Track & compare',
                       gradient: LinearGradient(
-                        colors: [Colors.blue, Colors.blue.withOpacity(0.7)],
+                        colors: [Colors.blue, Colors.blue.withValues(alpha: 0.7)],
                       ),
                       onTap: () {
                         HapticFeedback.mediumImpact();
@@ -196,7 +196,7 @@ class HomeScreen extends ConsumerWidget {
                       title: 'My Stores',
                       subtitle: 'Manage favorites',
                       gradient: LinearGradient(
-                        colors: [Colors.orange, Colors.orange.withOpacity(0.7)],
+                        colors: [Colors.orange, Colors.orange.withValues(alpha: 0.7)],
                       ),
                       onTap: () {
                         HapticFeedback.mediumImpact();
@@ -312,7 +312,7 @@ class HomeScreen extends ConsumerWidget {
               },
             ),
             const SizedBox(height: 12),
-            Text(
+            const Text(
               'Tip: You can add budget and store later',
               style: TextStyle(
                 fontSize: 12,
@@ -399,7 +399,7 @@ class HomeScreen extends ConsumerWidget {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.grey.withOpacity(0.3),
+                color: Colors.grey.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -411,7 +411,7 @@ class HomeScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 8),
-            Text(
+            const Text(
               'Select a cart to add scanned items',
               style: TextStyle(color: Colors.grey),
             ),
@@ -452,10 +452,10 @@ class HomeScreen extends ConsumerWidget {
     
     if (image != null && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Row(
             children: [
-              const SizedBox(
+              SizedBox(
                 width: 20,
                 height: 20,
                 child: CircularProgressIndicator(
@@ -463,12 +463,12 @@ class HomeScreen extends ConsumerWidget {
                   color: Colors.white,
                 ),
               ),
-              const SizedBox(width: 12),
-              const Text('Processing image...'),
+              SizedBox(width: 12),
+              Text('Processing image...'),
             ],
           ),
           backgroundColor: Colors.purple,
-          duration: const Duration(seconds: 2),
+          duration: Duration(seconds: 2),
         ),
       );
       
@@ -494,7 +494,7 @@ class HomeScreen extends ConsumerWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.15),
+              color: color.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(icon, color: color, size: 22),
@@ -537,7 +537,7 @@ class HomeScreen extends ConsumerWidget {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: gradient.colors.first.withOpacity(0.3),
+              color: gradient.colors.first.withValues(alpha: 0.3),
               blurRadius: 15,
               offset: const Offset(0, 8),
             ),
@@ -554,7 +554,7 @@ class HomeScreen extends ConsumerWidget {
                 child: Icon(
                   icon,
                   size: 100,
-                  color: Colors.white.withOpacity(0.1),
+                  color: Colors.white.withValues(alpha: 0.1),
                 ),
               ),
               // Content
@@ -568,7 +568,7 @@ class HomeScreen extends ConsumerWidget {
                       width: 45,
                       height: 45,
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
+                        color: Colors.white.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(icon, color: Colors.white, size: 24),
@@ -588,7 +588,7 @@ class HomeScreen extends ConsumerWidget {
                         Text(
                           subtitle,
                           style: TextStyle(
-                            color: Colors.white.withOpacity(0.8),
+                            color: Colors.white.withValues(alpha: 0.8),
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
                           ),
@@ -641,12 +641,12 @@ class HomeScreen extends ConsumerWidget {
           ),
           subtitle: Text(
             storeName ?? '$itemCount items',
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.grey,
               fontSize: 14,
             ),
           ),
-          trailing: Icon(
+          trailing: const Icon(
             Icons.arrow_forward_ios_rounded,
             size: 16,
             color: Colors.grey,

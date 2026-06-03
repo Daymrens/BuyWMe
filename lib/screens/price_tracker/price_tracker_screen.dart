@@ -82,7 +82,7 @@ class PriceTrackerScreen extends ConsumerWidget {
                                 Icon(
                                   Icons.insights_outlined,
                                   size: 60,
-                                  color: Colors.grey.withOpacity(0.3),
+                                  color: Colors.grey.withValues(alpha: 0.3),
                                 ),
                                 const SizedBox(height: 16),
                                 Text(
@@ -112,10 +112,10 @@ class PriceTrackerScreen extends ConsumerWidget {
                                   width: 40,
                                   height: 40,
                                   decoration: BoxDecoration(
-                                    color: AppTheme.primaryGreen.withOpacity(0.1),
+                                    color: AppTheme.primaryGreen.withValues(alpha: 0.1),
                                     borderRadius: BorderRadius.circular(10),
                                   ),
-                                  child: Icon(
+                                  child: const Icon(
                                     Icons.shopping_basket,
                                     color: AppTheme.primaryGreen,
                                     size: 20,
@@ -148,7 +148,7 @@ class PriceTrackerScreen extends ConsumerWidget {
                               ],
                             ),
                           );
-                        }).toList(),
+                        }),
                     ],
                   ),
                 ).animate().fadeIn().slideY(begin: 0.2, end: 0),
@@ -163,7 +163,7 @@ class PriceTrackerScreen extends ConsumerWidget {
                             width: 50,
                             height: 50,
                             decoration: BoxDecoration(
-                              color: Colors.orange.withOpacity(0.2),
+                              color: Colors.orange.withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(15),
                             ),
                             child: const Icon(
@@ -229,7 +229,7 @@ class PriceTrackerScreen extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppTheme.primaryGreen.withOpacity(0.05),
+        color: AppTheme.primaryGreen.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(

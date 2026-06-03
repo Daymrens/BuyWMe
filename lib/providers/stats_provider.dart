@@ -165,7 +165,48 @@ class StatsNotifier extends StateNotifier<ExpenseStats> {
   }
 
   ExpenseStats getMonthlyStats(int month, int year) {
-    return state;
+    final lists = _listBox.values
+        .where((l) => l.createdAt.month == month && l.createdAt.year == year)
+        .toList();
+
+    final categoryMap = <String, double>{};
+    final storeMap = <String, double>{};
+    double total = 0;
+
+    for (final list in lists) {
+      double listTotal = 0;
+      for (final item in list.items) {
+        listTotal += item.estimatedPrice;
+        try {
+          final product = _productBox.get(item.productId);
+          if (product != null) {
+            categoryMap[product.category] =
+                (categoryMap[product.category] ?? 0) + item.estimatedPrice;
+          }
+        } catch (_) {}
+      }
+      final storeName = list.storeName ?? 'Unknown Store';
+      storeMap[storeName] = (storeMap[storeName] ?? 0) + listTotal;
+      total += listTotal;
+    }
+
+    final categoryList = categoryMap.entries
+        .map((e) => CategoryData(category: e.key, total: e.value))
+        .toList()
+      ..sort((a, b) => b.total.compareTo(a.total));
+
+    final storeList = storeMap.entries
+        .map((e) => StoreData(store: e.key, total: e.value))
+        .toList()
+      ..sort((a, b) => b.total.compareTo(a.total));
+
+    return ExpenseStats(
+      monthlyTrend: state.monthlyTrend,
+      categoryBreakdown: categoryList,
+      storeBreakdown: storeList,
+      totalMonthly: total,
+      totalYearly: state.totalYearly,
+    );
   }
 
   List<CategoryData> getCategoryBreakdown() {

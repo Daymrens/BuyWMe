@@ -33,7 +33,7 @@ void main() {
 
     test('Substring matching works correctly', () {
       // Test the suggestion matching logic
-      final query = 'ric';
+      const query = 'ric';
       
       // Create a list of test items that would be indexed
       final testItems = ['rice', 'chicken', 'price', 'grice', 'brick'];
@@ -50,8 +50,8 @@ void main() {
 
     test('Case-insensitive matching works', () {
       // Test that matching is case-insensitive
-      final query = 'RICE';
-      final item = 'rice';
+      const query = 'RICE';
+      const item = 'rice';
       
       expect(item.contains(query.toLowerCase()), true);
     });
@@ -59,7 +59,7 @@ void main() {
     test('Suggestions respects max 5 items limit', () {
       service.indexItems();
       // Any query should return at most 5 suggestions
-      final longQuery = 'a';
+      const longQuery = 'a';
       final suggestions = service.getSuggestions(longQuery);
       
       expect(suggestions.length, lessThanOrEqualTo(5));

@@ -45,7 +45,7 @@ class _QuickScanScreenState extends State<QuickScanScreen> {
           // Overlay
           Container(
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.5),
+              color: Colors.black.withValues(alpha: 0.5),
             ),
             child: Stack(
               children: [
@@ -100,12 +100,12 @@ class _QuickScanScreenState extends State<QuickScanScreen> {
                           child: Container(
                             width: 40,
                             height: 40,
-                            decoration: BoxDecoration(
+                            decoration: const BoxDecoration(
                               border: Border(
                                 top: BorderSide(color: AppTheme.primaryGreen, width: 6),
                                 left: BorderSide(color: AppTheme.primaryGreen, width: 6),
                               ),
-                              borderRadius: const BorderRadius.only(
+                              borderRadius: BorderRadius.only(
                                 topLeft: Radius.circular(20),
                               ),
                             ),
@@ -117,12 +117,12 @@ class _QuickScanScreenState extends State<QuickScanScreen> {
                           child: Container(
                             width: 40,
                             height: 40,
-                            decoration: BoxDecoration(
+                            decoration: const BoxDecoration(
                               border: Border(
                                 top: BorderSide(color: AppTheme.primaryGreen, width: 6),
                                 right: BorderSide(color: AppTheme.primaryGreen, width: 6),
                               ),
-                              borderRadius: const BorderRadius.only(
+                              borderRadius: BorderRadius.only(
                                 topRight: Radius.circular(20),
                               ),
                             ),
@@ -134,12 +134,12 @@ class _QuickScanScreenState extends State<QuickScanScreen> {
                           child: Container(
                             width: 40,
                             height: 40,
-                            decoration: BoxDecoration(
+                            decoration: const BoxDecoration(
                               border: Border(
                                 bottom: BorderSide(color: AppTheme.primaryGreen, width: 6),
                                 left: BorderSide(color: AppTheme.primaryGreen, width: 6),
                               ),
-                              borderRadius: const BorderRadius.only(
+                              borderRadius: BorderRadius.only(
                                 bottomLeft: Radius.circular(20),
                               ),
                             ),
@@ -151,12 +151,12 @@ class _QuickScanScreenState extends State<QuickScanScreen> {
                           child: Container(
                             width: 40,
                             height: 40,
-                            decoration: BoxDecoration(
+                            decoration: const BoxDecoration(
                               border: Border(
                                 bottom: BorderSide(color: AppTheme.primaryGreen, width: 6),
                                 right: BorderSide(color: AppTheme.primaryGreen, width: 6),
                               ),
-                              borderRadius: const BorderRadius.only(
+                              borderRadius: BorderRadius.only(
                                 bottomRight: Radius.circular(20),
                               ),
                             ),
@@ -179,7 +179,7 @@ class _QuickScanScreenState extends State<QuickScanScreen> {
                           vertical: 12,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.7),
+                          color: Colors.black.withValues(alpha: 0.7),
                           borderRadius: BorderRadius.circular(30),
                         ),
                         child: const Text(
@@ -222,7 +222,7 @@ class _QuickScanScreenState extends State<QuickScanScreen> {
               width: 60,
               height: 60,
               decoration: BoxDecoration(
-                color: AppTheme.primaryGreen.withOpacity(0.2),
+                color: AppTheme.primaryGreen.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -242,7 +242,7 @@ class _QuickScanScreenState extends State<QuickScanScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: Colors.grey.withOpacity(0.1),
+                color: Colors.grey.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(

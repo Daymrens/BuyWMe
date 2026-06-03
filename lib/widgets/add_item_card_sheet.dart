@@ -115,7 +115,7 @@ class _AddItemCardSheetState extends ConsumerState<AddItemCardSheet>
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey.withOpacity(0.3),
+                  color: Colors.grey.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -206,8 +206,8 @@ class _AddItemCardSheetState extends ConsumerState<AddItemCardSheet>
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
         colors: [
-          AppTheme.primaryGreen.withOpacity(0.9),
-          AppTheme.gradientEnd.withOpacity(0.95),
+          AppTheme.primaryGreen.withValues(alpha: 0.9),
+          AppTheme.gradientEnd.withValues(alpha: 0.95),
         ],
       ),
       icon: Icons.inventory_2,
@@ -231,7 +231,7 @@ class _AddItemCardSheetState extends ConsumerState<AddItemCardSheet>
           margin: const EdgeInsets.only(right: 8),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.2),
+            color: Colors.white.withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(20),
           ),
           child: Row(
@@ -332,13 +332,13 @@ class _AddItemCardSheetState extends ConsumerState<AddItemCardSheet>
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isDark 
-                ? Colors.white.withOpacity(0.1)
-                : Colors.grey.withOpacity(0.2),
+                ? Colors.white.withValues(alpha: 0.1)
+                : Colors.grey.withValues(alpha: 0.2),
             width: 1,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),
@@ -399,7 +399,7 @@ class _AddItemCardSheetState extends ConsumerState<AddItemCardSheet>
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.15),
+            color: Colors.black.withValues(alpha: 0.15),
             blurRadius: 15,
             offset: const Offset(0, 5),
           ),
@@ -414,7 +414,7 @@ class _AddItemCardSheetState extends ConsumerState<AddItemCardSheet>
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Text(
@@ -438,7 +438,7 @@ class _AddItemCardSheetState extends ConsumerState<AddItemCardSheet>
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
+                        color: Colors.white.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: const Icon(
@@ -463,7 +463,7 @@ class _AddItemCardSheetState extends ConsumerState<AddItemCardSheet>
                           Text(
                             'Scan price tag or barcode',
                             style: TextStyle(
-                              color: Colors.white.withOpacity(0.9),
+                              color: Colors.white.withValues(alpha: 0.9),
                               fontSize: 13,
                             ),
                           ),
@@ -533,10 +533,10 @@ class _AddItemCardSheetState extends ConsumerState<AddItemCardSheet>
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.2),
+          color: Colors.white.withValues(alpha: 0.2),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: Colors.white.withOpacity(0.3),
+            color: Colors.white.withValues(alpha: 0.3),
           ),
         ),
         child: Column(
@@ -569,8 +569,8 @@ class _AddItemCardSheetState extends ConsumerState<AddItemCardSheet>
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
         colors: [
-          Colors.orange.withOpacity(0.85),
-          Colors.deepOrange.withOpacity(0.9),
+          Colors.orange.withValues(alpha: 0.85),
+          Colors.deepOrange.withValues(alpha: 0.9),
         ],
       ),
       icon: Icons.edit,
@@ -735,7 +735,7 @@ class _AddItemCardSheetState extends ConsumerState<AddItemCardSheet>
                           : Colors.white,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: AppTheme.primaryGreen.withOpacity(0.3),
+                        color: AppTheme.primaryGreen.withValues(alpha: 0.3),
                         width: 1,
                       ),
                     ),
@@ -760,7 +760,7 @@ class _AddItemCardSheetState extends ConsumerState<AddItemCardSheet>
                               border: index < suggestions.length - 1
                                   ? Border(
                                       bottom: BorderSide(
-                                        color: Colors.grey.withOpacity(0.2),
+                                        color: Colors.grey.withValues(alpha: 0.2),
                                         width: 0.5,
                                       ),
                                     )
@@ -792,12 +792,12 @@ class _AddItemCardSheetState extends ConsumerState<AddItemCardSheet>
                                     ),
                                     decoration: BoxDecoration(
                                       color: AppTheme.primaryGreen
-                                          .withOpacity(0.2),
+                                          .withValues(alpha: 0.2),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Text(
                                       '×$frequency',
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         fontSize: 12,
                                         color: AppTheme.primaryGreen,
                                         fontWeight: FontWeight.w600,
@@ -840,8 +840,8 @@ class _AddItemCardSheetState extends ConsumerState<AddItemCardSheet>
             color: isSelected
                 ? Colors.white
                 : isDark 
-                    ? Colors.white.withOpacity(0.15)
-                    : Colors.white.withOpacity(0.3),
+                    ? Colors.white.withValues(alpha: 0.15)
+                    : Colors.white.withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: isSelected ? color : Colors.transparent,
@@ -920,7 +920,7 @@ class _AddItemCardSheetState extends ConsumerState<AddItemCardSheet>
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
+                  color: Colors.black.withValues(alpha: 0.2),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -1016,7 +1016,7 @@ class _ExpandableActionCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 15,
             offset: const Offset(0, 5),
           ),
@@ -1038,7 +1038,7 @@ class _ExpandableActionCard extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.2),
+                        color: Colors.white.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
@@ -1063,7 +1063,7 @@ class _ExpandableActionCard extends StatelessWidget {
                           Text(
                             subtitle,
                             style: TextStyle(
-                              color: Colors.white.withOpacity(0.9),
+                              color: Colors.white.withValues(alpha: 0.9),
                               fontSize: 13,
                             ),
                           ),
@@ -1075,7 +1075,7 @@ class _ExpandableActionCard extends StatelessWidget {
                       turns: isExpanded ? 0.5 : 0,
                       child: Icon(
                         Icons.keyboard_arrow_down,
-                        color: Colors.white.withOpacity(0.7),
+                        color: Colors.white.withValues(alpha: 0.7),
                         size: 24,
                       ),
                     ),

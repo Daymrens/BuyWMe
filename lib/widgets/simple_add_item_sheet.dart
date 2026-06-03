@@ -91,13 +91,13 @@ class _SimpleAddItemSheetState extends ConsumerState<SimpleAddItemSheet> {
           return Container(
             decoration: BoxDecoration(
               color: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.black.withOpacity(0.3)
-                  : Colors.white.withOpacity(0.9),
+                  ? Colors.black.withValues(alpha: 0.3)
+                  : Colors.white.withValues(alpha: 0.9),
               borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
               border: Border.all(
                 color: Theme.of(context).brightness == Brightness.dark
-                    ? Colors.white.withOpacity(0.1)
-                    : Colors.grey.withOpacity(0.2),
+                    ? Colors.white.withValues(alpha: 0.1)
+                    : Colors.grey.withValues(alpha: 0.2),
               ),
             ),
             child: Column(
@@ -128,8 +128,8 @@ class _SimpleAddItemSheetState extends ConsumerState<SimpleAddItemSheet> {
         border: Border(
           bottom: BorderSide(
             color: Theme.of(context).brightness == Brightness.dark
-                ? Colors.white.withOpacity(0.1)
-                : Colors.grey.withOpacity(0.2),
+                ? Colors.white.withValues(alpha: 0.1)
+                : Colors.grey.withValues(alpha: 0.2),
           ),
         ),
       ),
@@ -140,7 +140,7 @@ class _SimpleAddItemSheetState extends ConsumerState<SimpleAddItemSheet> {
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: Colors.grey.withOpacity(0.3),
+              color: Colors.grey.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -190,7 +190,7 @@ class _SimpleAddItemSheetState extends ConsumerState<SimpleAddItemSheet> {
                           : _currentView == 'quick'
                               ? 'Select from common items'
                               : 'Enter item details',
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.grey,
                         fontSize: 13,
                       ),
@@ -221,7 +221,7 @@ class _SimpleAddItemSheetState extends ConsumerState<SimpleAddItemSheet> {
           title: 'Quick Add',
           subtitle: 'Choose from common items',
           gradient: LinearGradient(
-            colors: [AppTheme.primaryGreen, AppTheme.primaryGreen.withOpacity(0.7)],
+            colors: [AppTheme.primaryGreen, AppTheme.primaryGreen.withValues(alpha: 0.7)],
           ),
           onTap: () {
             HapticFeedback.mediumImpact();
@@ -310,7 +310,7 @@ class _SimpleAddItemSheetState extends ConsumerState<SimpleAddItemSheet> {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: gradient.colors.first.withOpacity(0.3),
+              color: gradient.colors.first.withValues(alpha: 0.3),
               blurRadius: 15,
               offset: const Offset(0, 8),
             ),
@@ -322,7 +322,7 @@ class _SimpleAddItemSheetState extends ConsumerState<SimpleAddItemSheet> {
               width: 56,
               height: 56,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Icon(icon, color: Colors.white, size: 28),
@@ -344,7 +344,7 @@ class _SimpleAddItemSheetState extends ConsumerState<SimpleAddItemSheet> {
                   Text(
                     subtitle,
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.9),
+                      color: Colors.white.withValues(alpha: 0.9),
                       fontSize: 14,
                     ),
                   ),
@@ -353,7 +353,7 @@ class _SimpleAddItemSheetState extends ConsumerState<SimpleAddItemSheet> {
             ),
             Icon(
               Icons.arrow_forward_ios,
-              color: Colors.white.withOpacity(0.7),
+              color: Colors.white.withValues(alpha: 0.7),
               size: 20,
             ),
           ],
@@ -386,8 +386,8 @@ class _SimpleAddItemSheetState extends ConsumerState<SimpleAddItemSheet> {
                   },
                   selectedColor: AppTheme.primaryGreen,
                   backgroundColor: Theme.of(context).brightness == Brightness.dark
-                      ? Colors.white.withOpacity(0.1)
-                      : Colors.grey.withOpacity(0.2),
+                      ? Colors.white.withValues(alpha: 0.1)
+                      : Colors.grey.withValues(alpha: 0.2),
                   labelStyle: TextStyle(
                     color: isSelected ? Colors.white : null,
                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
@@ -445,17 +445,17 @@ class _SimpleAddItemSheetState extends ConsumerState<SimpleAddItemSheet> {
       child: Container(
         decoration: BoxDecoration(
           color: Theme.of(context).brightness == Brightness.dark
-              ? Colors.white.withOpacity(0.05)
+              ? Colors.white.withValues(alpha: 0.05)
               : Colors.white,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: Theme.of(context).brightness == Brightness.dark
-                ? Colors.white.withOpacity(0.1)
-                : Colors.grey.withOpacity(0.2),
+                ? Colors.white.withValues(alpha: 0.1)
+                : Colors.grey.withValues(alpha: 0.2),
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -480,7 +480,7 @@ class _SimpleAddItemSheetState extends ConsumerState<SimpleAddItemSheet> {
             const SizedBox(height: 4),
             Text(
               '₱${price.toStringAsFixed(0)}/$unit',
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 13,
                 color: AppTheme.primaryGreen,
                 fontWeight: FontWeight.w600,
@@ -510,8 +510,8 @@ class _SimpleAddItemSheetState extends ConsumerState<SimpleAddItemSheet> {
             ),
             filled: true,
             fillColor: Theme.of(context).brightness == Brightness.dark
-                ? Colors.white.withOpacity(0.05)
-                : Colors.grey.withOpacity(0.1),
+                ? Colors.white.withValues(alpha: 0.05)
+                : Colors.grey.withValues(alpha: 0.1),
           ),
         ).animate().fadeIn(delay: 50.ms).slideY(begin: 0.1),
         
@@ -533,8 +533,8 @@ class _SimpleAddItemSheetState extends ConsumerState<SimpleAddItemSheet> {
                   ),
                   filled: true,
                   fillColor: Theme.of(context).brightness == Brightness.dark
-                      ? Colors.white.withOpacity(0.05)
-                      : Colors.grey.withOpacity(0.1),
+                      ? Colors.white.withValues(alpha: 0.05)
+                      : Colors.grey.withValues(alpha: 0.1),
                 ),
               ).animate().fadeIn(delay: 100.ms).slideY(begin: 0.1),
             ),
@@ -551,8 +551,8 @@ class _SimpleAddItemSheetState extends ConsumerState<SimpleAddItemSheet> {
                   ),
                   filled: true,
                   fillColor: Theme.of(context).brightness == Brightness.dark
-                      ? Colors.white.withOpacity(0.05)
-                      : Colors.grey.withOpacity(0.1),
+                      ? Colors.white.withValues(alpha: 0.05)
+                      : Colors.grey.withValues(alpha: 0.1),
                 ),
                 items: const [
                   DropdownMenuItem(value: 'pcs', child: Text('Pieces')),
@@ -586,8 +586,8 @@ class _SimpleAddItemSheetState extends ConsumerState<SimpleAddItemSheet> {
             ),
             filled: true,
             fillColor: Theme.of(context).brightness == Brightness.dark
-                ? Colors.white.withOpacity(0.05)
-                : Colors.grey.withOpacity(0.1),
+                ? Colors.white.withValues(alpha: 0.05)
+                : Colors.grey.withValues(alpha: 0.1),
           ),
         ).animate().fadeIn(delay: 150.ms).slideY(begin: 0.1),
         
@@ -597,8 +597,8 @@ class _SimpleAddItemSheetState extends ConsumerState<SimpleAddItemSheet> {
         Container(
           decoration: BoxDecoration(
             color: Theme.of(context).brightness == Brightness.dark
-                ? Colors.white.withOpacity(0.05)
-                : Colors.grey.withOpacity(0.1),
+                ? Colors.white.withValues(alpha: 0.05)
+                : Colors.grey.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: _addToFavorites ? AppTheme.primaryGreen : Colors.transparent,
@@ -634,9 +634,9 @@ class _SimpleAddItemSheetState extends ConsumerState<SimpleAddItemSheet> {
             ),
             elevation: 4,
           ),
-          child: Row(
+          child: const Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
+            children: [
               Icon(Icons.add_circle),
               SizedBox(width: 8),
               Text(
@@ -684,7 +684,7 @@ class _SimpleAddItemSheetState extends ConsumerState<SimpleAddItemSheet> {
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
+                  color: Colors.black.withValues(alpha: 0.2),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),

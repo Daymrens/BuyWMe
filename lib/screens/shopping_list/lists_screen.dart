@@ -235,7 +235,7 @@ class ListsScreen extends ConsumerWidget {
                             margin: const EdgeInsets.only(bottom: 16),
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
-                                colors: [AppTheme.primaryGreen, AppTheme.primaryGreen.withOpacity(0.7)],
+                                colors: [AppTheme.primaryGreen, AppTheme.primaryGreen.withValues(alpha: 0.7)],
                               ),
                               borderRadius: BorderRadius.circular(20),
                             ),
@@ -254,7 +254,7 @@ class ListsScreen extends ConsumerWidget {
                             margin: const EdgeInsets.only(bottom: 16),
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
-                                colors: [Colors.blue.withOpacity(0.7), Colors.blue],
+                                colors: [Colors.blue.withValues(alpha: 0.7), Colors.blue],
                               ),
                               borderRadius: BorderRadius.circular(20),
                             ),
@@ -323,8 +323,8 @@ class ListsScreen extends ConsumerWidget {
                                   const SizedBox(height: 12),
                                   LinearProgressIndicator(
                                     value: progress,
-                                    backgroundColor: Colors.grey.withOpacity(0.2),
-                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                    backgroundColor: Colors.grey.withValues(alpha: 0.2),
+                                    valueColor: const AlwaysStoppedAnimation<Color>(
                                       AppTheme.primaryGreen,
                                     ),
                                     borderRadius: BorderRadius.circular(10),
@@ -362,8 +362,8 @@ class ListsScreen extends ConsumerWidget {
                                           ),
                                           decoration: BoxDecoration(
                                             color: total > list.budget!
-                                                ? Colors.red.withOpacity(0.2)
-                                                : Colors.green.withOpacity(0.2),
+                                                ? Colors.red.withValues(alpha: 0.2)
+                                                : Colors.green.withValues(alpha: 0.2),
                                             borderRadius: BorderRadius.circular(12),
                                           ),
                                           child: Text(
@@ -443,7 +443,7 @@ class ListsScreen extends ConsumerWidget {
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: Colors.grey.withOpacity(0.3),
+                      color: Colors.grey.withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -467,8 +467,8 @@ class ListsScreen extends ConsumerWidget {
                     ),
                     filled: true,
                     fillColor: Theme.of(context).brightness == Brightness.dark
-                        ? Colors.white.withOpacity(0.05)
-                        : Colors.grey.withOpacity(0.1),
+                        ? Colors.white.withValues(alpha: 0.05)
+                        : Colors.grey.withValues(alpha: 0.1),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -485,8 +485,8 @@ class ListsScreen extends ConsumerWidget {
                     ),
                     filled: true,
                     fillColor: Theme.of(context).brightness == Brightness.dark
-                        ? Colors.white.withOpacity(0.05)
-                        : Colors.grey.withOpacity(0.1),
+                        ? Colors.white.withValues(alpha: 0.05)
+                        : Colors.grey.withValues(alpha: 0.1),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -610,7 +610,7 @@ class ListsScreen extends ConsumerWidget {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(15),
                           ),
-                          side: BorderSide(color: Colors.grey.withOpacity(0.3)),
+                          side: BorderSide(color: Colors.grey.withValues(alpha: 0.3)),
                         ),
                         child: Text(
                           'Cancel',
@@ -631,7 +631,7 @@ class ListsScreen extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(15),
                           boxShadow: [
                             BoxShadow(
-                              color: AppTheme.primaryGreen.withOpacity(0.3),
+                              color: AppTheme.primaryGreen.withValues(alpha: 0.3),
                               blurRadius: 8,
                               offset: const Offset(0, 4),
                             ),
@@ -745,7 +745,7 @@ class ListsScreen extends ConsumerWidget {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey.withOpacity(0.3),
+                  color: Colors.grey.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -827,9 +827,7 @@ class ListsScreen extends ConsumerWidget {
               color: Colors.purple,
               onTap: () {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Share feature coming soon!')),
-                );
+                _shareCartAsText(context, cart);
               },
             ),
             _buildActionTile(
@@ -839,9 +837,7 @@ class ListsScreen extends ConsumerWidget {
               color: Colors.teal,
               onTap: () {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Template saved!')),
-                );
+                _saveAsTemplate(context, ref, cart);
               },
             ),
             _buildActionTile(
@@ -851,9 +847,7 @@ class ListsScreen extends ConsumerWidget {
               color: Colors.indigo,
               onTap: () {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('CSV export coming soon!')),
-                );
+                _exportAsCsv(context, cart);
               },
             ),
             _buildActionTile(
@@ -863,11 +857,7 @@ class ListsScreen extends ConsumerWidget {
               color: Colors.green,
               onTap: () {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Trip completed! Total: ₱${cart.items.fold<double>(0, (sum, item) => sum + (item.estimatedPrice * item.quantity)).toStringAsFixed(2)}'),
-                  ),
-                );
+                _completeTripDialog(context, ref, cart);
               },
             ),
             const Divider(height: 32),
@@ -905,7 +895,7 @@ class ListsScreen extends ConsumerWidget {
         width: 40,
         height: 40,
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Icon(icon, color: color, size: 20),
@@ -1027,7 +1017,7 @@ class ListsScreen extends ConsumerWidget {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: color.withOpacity(0.2),
+                color: color.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(icon, color: color, size: 24),
@@ -1080,10 +1070,10 @@ class ListsScreen extends ConsumerWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: isSelected
-              ? accentColor.withOpacity(0.15)
+              ? accentColor.withValues(alpha: 0.15)
               : Theme.of(context).brightness == Brightness.dark
-                  ? Colors.white.withOpacity(0.05)
-                  : Colors.grey.withOpacity(0.1),
+                  ? Colors.white.withValues(alpha: 0.05)
+                  : Colors.grey.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(15),
           border: Border.all(
             color: isSelected ? accentColor : Colors.transparent,
@@ -1096,7 +1086,7 @@ class ListsScreen extends ConsumerWidget {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: accentColor.withOpacity(0.2),
+                color: accentColor.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Center(
@@ -1180,10 +1170,10 @@ class ListsScreen extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: isSelected
-              ? color.withOpacity(0.15)
+              ? color.withValues(alpha: 0.15)
               : Theme.of(context).brightness == Brightness.dark
-                  ? Colors.white.withOpacity(0.05)
-                  : Colors.grey.withOpacity(0.1),
+                  ? Colors.white.withValues(alpha: 0.05)
+                  : Colors.grey.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isSelected ? color : Colors.transparent,
@@ -1197,7 +1187,7 @@ class ListsScreen extends ConsumerWidget {
               width: 32,
               height: 32,
               decoration: BoxDecoration(
-                color: color.withOpacity(0.2),
+                color: color.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -1224,6 +1214,204 @@ class ListsScreen extends ConsumerWidget {
             ],
           ],
         ),
+      ),
+    );
+  }
+
+  /// Share cart as plain text via clipboard
+  void _shareCartAsText(BuildContext context, dynamic cart) {
+    final currencyFormat = NumberFormat.currency(locale: 'en_PH', symbol: '₱');
+    final total = cart.items.fold<double>(
+        0, (sum, item) => sum + (item.estimatedPrice * item.quantity));
+
+    final buffer = StringBuffer();
+    buffer.writeln('🛒 ${cart.name}');
+    if (cart.storeName != null) buffer.writeln('📍 ${cart.storeName}');
+    buffer.writeln('');
+
+    for (final item in cart.items) {
+      final status = item.isDone ? '✅' : '⬜';
+      buffer.writeln(
+          '$status ${item.name}  ×${item.quantity} ${item.unit}  ${currencyFormat.format(item.estimatedPrice * item.quantity)}');
+    }
+
+    buffer.writeln('');
+    buffer.writeln('Total: ${currencyFormat.format(total)}');
+    if (cart.budget != null) {
+      buffer.writeln('Budget: ${currencyFormat.format(cart.budget)}');
+    }
+
+    final text = buffer.toString();
+    Clipboard.setData(ClipboardData(text: text));
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Cart copied to clipboard — paste to share!'),
+        backgroundColor: Colors.purple,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
+  }
+
+  /// Export cart as CSV text via clipboard
+  void _exportAsCsv(BuildContext context, dynamic cart) {
+    final buffer = StringBuffer();
+    buffer.writeln('Name,Quantity,Unit,Unit Price,Total,Done');
+
+    for (final item in cart.items) {
+      final name = '"${item.name.replaceAll('"', '""')}"';
+      final done = item.isDone ? 'Yes' : 'No';
+      buffer.writeln(
+          '$name,${item.quantity},${item.unit},${item.estimatedPrice},${item.estimatedPrice * item.quantity},$done');
+    }
+
+    final total = cart.items.fold<double>(
+        0, (sum, item) => sum + (item.estimatedPrice * item.quantity));
+    buffer.writeln('"TOTAL",,,,$total,');
+
+    Clipboard.setData(ClipboardData(text: buffer.toString()));
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('CSV copied to clipboard!'),
+        backgroundColor: Colors.indigo,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
+  }
+
+  /// Save current cart items as a new template cart
+  void _saveAsTemplate(BuildContext context, WidgetRef ref, dynamic cart) {
+    final nameController = TextEditingController(text: '${cart.name} (Template)');
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Save as Template'),
+        content: TextField(
+          controller: nameController,
+          decoration: const InputDecoration(
+            labelText: 'Template name',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final name = nameController.text.trim();
+              if (name.isEmpty) return;
+              Navigator.pop(context);
+
+              // Create a new cart with the same items (all unchecked)
+              final notifier = ref.read(shoppingListProvider.notifier);
+              notifier.addList(name, budget: cart.budget, storeId: cart.storeId, storeName: cart.storeName);
+              final newLists = ref.read(shoppingListProvider);
+              // The new list was just added at the end
+              if (newLists.isNotEmpty) {
+                final newCart = newLists.last;
+                for (final item in cart.items as List) {
+                  final newItem = ShoppingItem(
+                    id: const Uuid().v4(),
+                    productId: item.productId,
+                    name: item.name,
+                    quantity: item.quantity,
+                    unit: item.unit,
+                    estimatedPrice: item.estimatedPrice,
+                  );
+                  notifier.addItem(newCart.id, newItem);
+                }
+              }
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('"$name" saved as a new cart!'),
+                  backgroundColor: Colors.teal,
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)),
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.teal, foregroundColor: Colors.white),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Mark all items as done and show trip summary
+  void _completeTripDialog(BuildContext context, WidgetRef ref, dynamic cart) {
+    final currencyFormat = NumberFormat.currency(locale: 'en_PH', symbol: '₱');
+    final total = cart.items.fold<double>(
+        0, (sum, item) => sum + (item.estimatedPrice * item.quantity));
+    final doneCount = (cart.items as List).where((i) => i.isDone).length;
+    final totalCount = (cart.items as List).length;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.check_circle, color: Colors.green),
+            SizedBox(width: 8),
+            Text('Complete Trip'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Mark remaining items as done and complete this trip?'),
+            const SizedBox(height: 12),
+            Text('Progress: $doneCount / $totalCount items done'),
+            Text('Total spent: ${currencyFormat.format(total)}'),
+            if (cart.budget != null)
+              Text(
+                total > cart.budget
+                    ? 'Over budget by ${currencyFormat.format(total - cart.budget)}'
+                    : 'Saved ${currencyFormat.format(cart.budget - total)} from budget',
+                style: TextStyle(
+                  color: total > cart.budget ? Colors.red : Colors.green,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              // Mark all items as done
+              for (final item in cart.items as List) {
+                if (!item.isDone) {
+                  ref.read(shoppingListProvider.notifier).toggleItem(cart.id, item.id);
+                }
+              }
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Trip completed! Total: ${currencyFormat.format(total)}'),
+                  backgroundColor: Colors.green,
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)),
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green, foregroundColor: Colors.white),
+            child: const Text('Complete'),
+          ),
+        ],
       ),
     );
   }
@@ -1273,7 +1461,7 @@ class ListsScreen extends ConsumerWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
+              const Icon(
                 Icons.star,
                 color: Colors.amber,
                 size: 24,
@@ -1335,13 +1523,13 @@ class ListsScreen extends ConsumerWidget {
                           width: 40,
                           height: 4,
                           decoration: BoxDecoration(
-                            color: Colors.grey.withOpacity(0.3),
+                            color: Colors.grey.withValues(alpha: 0.3),
                             borderRadius: BorderRadius.circular(2),
                           ),
                         ),
                       ),
                       const SizedBox(height: 20),
-                      Icon(
+                      const Icon(
                         Icons.star,
                         color: Colors.amber,
                         size: 48,

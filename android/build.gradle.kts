@@ -5,6 +5,8 @@ allprojects {
     }
 }
 
+// Use a build directory outside the space-containing user path to avoid
+// Gradle path-splitting bugs on Windows when the username contains spaces.
 val newBuildDir: Directory =
     rootProject.layout.buildDirectory
         .dir("../../build")

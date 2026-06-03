@@ -107,8 +107,8 @@ class _ExpenseStatsScreenState extends ConsumerState<ExpenseStatsScreen> with Si
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
                       color: isDark
-                          ? Colors.black.withOpacity(0.2)
-                          : Colors.white.withOpacity(0.2),
+                          ? Colors.black.withValues(alpha: 0.2)
+                          : Colors.white.withValues(alpha: 0.2),
                     ),
                     child: TabBar(
                       controller: _tabController,
@@ -187,7 +187,7 @@ class _ExpenseStatsScreenState extends ConsumerState<ExpenseStatsScreen> with Si
                         horizontalInterval: maxY / 4,
                         getDrawingHorizontalLine: (value) {
                           return FlLine(
-                            color: Colors.grey.withOpacity(0.2),
+                            color: Colors.grey.withValues(alpha: 0.2),
                             strokeWidth: 1,
                           );
                         },
@@ -270,7 +270,7 @@ class _ExpenseStatsScreenState extends ConsumerState<ExpenseStatsScreen> with Si
                           ),
                           belowBarData: BarAreaData(
                             show: true,
-                            color: AppTheme.primaryGreen.withOpacity(0.1),
+                            color: AppTheme.primaryGreen.withValues(alpha: 0.1),
                           ),
                         ),
                       ],
@@ -447,7 +447,7 @@ class _ExpenseStatsScreenState extends ConsumerState<ExpenseStatsScreen> with Si
                         horizontalInterval: maxY / 4,
                         getDrawingHorizontalLine: (value) {
                           return FlLine(
-                            color: Colors.grey.withOpacity(0.2),
+                            color: Colors.grey.withValues(alpha: 0.2),
                             strokeWidth: 1,
                           );
                         },
@@ -510,7 +510,7 @@ class _ExpenseStatsScreenState extends ConsumerState<ExpenseStatsScreen> with Si
                           barRods: [
                             BarChartRodData(
                               toY: topStores[index].total,
-                              color: AppTheme.primaryGreen.withOpacity(0.8 - (index * 0.1)),
+                              color: AppTheme.primaryGreen.withValues(alpha: 0.8 - (index * 0.1)),
                               width: 30,
                               borderRadius: const BorderRadius.only(
                                 topLeft: Radius.circular(6),
@@ -553,7 +553,7 @@ class _ExpenseStatsScreenState extends ConsumerState<ExpenseStatsScreen> with Si
                               width: 40,
                               height: 40,
                               decoration: BoxDecoration(
-                                color: AppTheme.primaryGreen.withOpacity(0.2),
+                                color: AppTheme.primaryGreen.withValues(alpha: 0.2),
                                 shape: BoxShape.circle,
                               ),
                               child: Center(

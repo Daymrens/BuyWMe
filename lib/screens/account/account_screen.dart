@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../providers/theme_provider.dart';
+import '../../providers/shopping_list_provider.dart';
 import '../../widgets/glassmorphic_card.dart';
 import '../../theme/app_theme.dart';
 import 'my_stores_screen.dart';
@@ -39,6 +40,19 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
     final themeMode = ref.watch(themeProvider);
     final isDark = themeMode == ThemeMode.dark;
     final nickname = ref.watch(nicknameProvider);
+    final lists = ref.watch(shoppingListProvider);
+
+    // Compute real stats from shopping lists
+    final totalCarts = lists.length;
+    final totalItems = lists.fold<int>(0, (sum, l) => sum + l.items.length);
+    // Savings = sum of (budget - spent) for carts that are within budget
+    final totalSaved = lists.fold<double>(0, (sum, l) {
+      if (l.budget == null) return sum;
+      final spent = l.items.fold<double>(
+          0, (s, i) => s + i.estimatedPrice * i.quantity);
+      final saved = l.budget! - spent;
+      return saved > 0 ? sum + saved : sum;
+    });
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -56,8 +70,8 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      AppTheme.primaryGreen.withOpacity(0.3),
-                      AppTheme.gradientEnd.withOpacity(0.2),
+                      AppTheme.primaryGreen.withValues(alpha: 0.3),
+                      AppTheme.gradientEnd.withValues(alpha: 0.2),
                     ],
                   ),
                 ),
@@ -74,7 +88,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: AppTheme.primaryGreen.withOpacity(0.4),
+                              color: AppTheme.primaryGreen.withValues(alpha: 0.4),
                               blurRadius: 30,
                               offset: const Offset(0, 10),
                             ),
@@ -97,7 +111,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                         decoration: BoxDecoration(
-                          color: AppTheme.primaryGreen.withOpacity(0.2),
+                          color: AppTheme.primaryGreen.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
@@ -125,27 +139,27 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                       Expanded(
                         child: _buildStatItem(
                           context,
-                          '0',
+                          totalCarts.toString(),
                           'Carts',
                           Icons.shopping_cart,
                           Colors.blue,
                         ),
                       ),
-                      Container(width: 1, height: 50, color: Colors.grey.withOpacity(0.2)),
+                      Container(width: 1, height: 50, color: Colors.grey.withValues(alpha: 0.2)),
                       Expanded(
                         child: _buildStatItem(
                           context,
-                          '0',
+                          totalItems.toString(),
                           'Items',
                           Icons.inventory_2,
                           Colors.orange,
                         ),
                       ),
-                      Container(width: 1, height: 50, color: Colors.grey.withOpacity(0.2)),
+                      Container(width: 1, height: 50, color: Colors.grey.withValues(alpha: 0.2)),
                       Expanded(
                         child: _buildStatItem(
                           context,
-                          '₱0',
+                          '₱${totalSaved.toStringAsFixed(0)}',
                           'Saved',
                           Icons.savings,
                           Colors.green,
@@ -369,7 +383,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.logout,
                             color: Colors.red,
                           ),
@@ -438,7 +452,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
         width: 48,
         height: 48,
         decoration: BoxDecoration(
-          color: color.withOpacity(0.15),
+          color: color.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Icon(
@@ -460,7 +474,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
             ),
       ),
       trailing: trailing ??
-          Icon(
+          const Icon(
             Icons.chevron_right,
             size: 20,
             color: Colors.grey,
@@ -563,11 +577,11 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           border: Border.all(
-            color: selected ? AppTheme.primaryGreen : Colors.grey.withOpacity(0.3),
+            color: selected ? AppTheme.primaryGreen : Colors.grey.withValues(alpha: 0.3),
             width: selected ? 2 : 1,
           ),
           borderRadius: BorderRadius.circular(12),
-          color: selected ? AppTheme.primaryGreen.withOpacity(0.1) : Colors.transparent,
+          color: selected ? AppTheme.primaryGreen.withValues(alpha: 0.1) : Colors.transparent,
         ),
         child: Row(
           children: [
@@ -666,14 +680,20 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Signed out successfully'),
-                  backgroundColor: Colors.red,
-                ),
-              );
+              // Clear stored nickname and reset to default
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.remove('user_nickname');
+              if (context.mounted) {
+                ref.read(nicknameProvider.notifier).state = 'Guest User';
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Signed out successfully'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: const Text('Sign Out'),

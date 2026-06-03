@@ -56,7 +56,7 @@ class MyStoresScreen extends ConsumerWidget {
                           Icon(
                             Icons.store_outlined,
                             size: 80,
-                            color: Colors.grey.withOpacity(0.3),
+                            color: Colors.grey.withValues(alpha: 0.3),
                           ),
                           const SizedBox(height: 16),
                           Text(
@@ -121,13 +121,13 @@ class MyStoresScreen extends ConsumerWidget {
                                           vertical: 4,
                                         ),
                                         decoration: BoxDecoration(
-                                          color: AppTheme.primaryGreen.withOpacity(0.2),
+                                          color: AppTheme.primaryGreen.withValues(alpha: 0.2),
                                           borderRadius: BorderRadius.circular(12),
                                         ),
                                         child: Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            Icon(
+                                            const Icon(
                                               Icons.shopping_bag,
                                               size: 14,
                                               color: AppTheme.primaryGreen,
@@ -135,7 +135,7 @@ class MyStoresScreen extends ConsumerWidget {
                                             const SizedBox(width: 4),
                                             Text(
                                               '${store.productCount} products',
-                                              style: TextStyle(
+                                              style: const TextStyle(
                                                 fontSize: 12,
                                                 color: AppTheme.primaryGreen,
                                                 fontWeight: FontWeight.w600,
@@ -146,7 +146,7 @@ class MyStoresScreen extends ConsumerWidget {
                                       ),
                                       if (store.isFavorite) ...[
                                         const SizedBox(width: 8),
-                                        Icon(
+                                        const Icon(
                                           Icons.favorite,
                                           size: 16,
                                           color: Colors.red,

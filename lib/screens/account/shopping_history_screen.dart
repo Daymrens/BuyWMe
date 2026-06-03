@@ -64,7 +64,7 @@ class ShoppingHistoryScreen extends ConsumerWidget {
                       Icon(
                         Icons.history,
                         size: 80,
-                        color: Colors.grey.withOpacity(0.3),
+                        color: Colors.grey.withValues(alpha: 0.3),
                       ),
                       const SizedBox(height: 16),
                       Text(
@@ -101,7 +101,7 @@ class ShoppingHistoryScreen extends ConsumerWidget {
                             Icons.shopping_cart,
                             Colors.blue,
                           ),
-                          Container(width: 1, height: 50, color: Colors.grey.withOpacity(0.2)),
+                          Container(width: 1, height: 50, color: Colors.grey.withValues(alpha: 0.2)),
                           _buildStatItem(
                             context,
                             completedLists.fold<int>(0, (sum, list) => sum + list.items.length).toString(),
@@ -109,7 +109,7 @@ class ShoppingHistoryScreen extends ConsumerWidget {
                             Icons.inventory_2,
                             Colors.orange,
                           ),
-                          Container(width: 1, height: 50, color: Colors.grey.withOpacity(0.2)),
+                          Container(width: 1, height: 50, color: Colors.grey.withValues(alpha: 0.2)),
                           _buildStatItem(
                             context,
                             currencyFormat.format(
@@ -174,11 +174,11 @@ class ShoppingHistoryScreen extends ConsumerWidget {
                               Row(
                                 children: [
                                   if (list.storeName != null) ...[
-                                    Icon(Icons.store, size: 14, color: AppTheme.primaryGreen),
+                                    const Icon(Icons.store, size: 14, color: AppTheme.primaryGreen),
                                     const SizedBox(width: 4),
                                     Text(
                                       list.storeName!,
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         fontSize: 12,
                                         color: AppTheme.primaryGreen,
                                       ),
@@ -210,7 +210,7 @@ class ShoppingHistoryScreen extends ConsumerWidget {
                                 final item = list.items[itemIndex];
                                 return ListTile(
                                   dense: true,
-                                  leading: Icon(
+                                  leading: const Icon(
                                     Icons.check_circle,
                                     color: AppTheme.primaryGreen,
                                     size: 20,

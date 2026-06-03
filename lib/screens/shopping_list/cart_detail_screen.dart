@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -48,7 +48,7 @@ class CartDetailScreen extends ConsumerWidget {
       );
     }
     final cart = cartMatches.first;
-    final currencyFormat = NumberFormat.currency(locale: 'en_PH', symbol: '₱');
+    final currencyFormat = NumberFormat.currency(locale: 'en_PH', symbol: '?');
     
     final total = cart.items.fold<double>(
       0,
@@ -120,7 +120,7 @@ class CartDetailScreen extends ConsumerWidget {
                       if (cart.storeName != null)
                         Row(
                           children: [
-                            Icon(Icons.store, size: 16, color: AppTheme.primaryGreen),
+                            const Icon(Icons.store, size: 16, color: AppTheme.primaryGreen),
                             const SizedBox(width: 4),
                             Text(
                               cart.storeName!,
@@ -153,7 +153,7 @@ class CartDetailScreen extends ConsumerWidget {
                               Icons.shopping_cart,
                               Colors.blue,
                             ),
-                            Container(width: 1, height: 40, color: Colors.grey.withOpacity(0.3)),
+                            Container(width: 1, height: 40, color: Colors.grey.withValues(alpha: 0.3)),
                             if (cart.budget != null)
                               _buildSummaryItem(
                                 context,
@@ -193,7 +193,7 @@ class CartDetailScreen extends ConsumerWidget {
                               const SizedBox(height: 8),
                               LinearProgressIndicator(
                                 value: cart.budget! > 0 ? (total / cart.budget!).clamp(0.0, 1.0) : 0,
-                                backgroundColor: Colors.grey.withOpacity(0.2),
+                                backgroundColor: Colors.grey.withValues(alpha: 0.2),
                                 valueColor: AlwaysStoppedAnimation<Color>(
                                   total > cart.budget! ? Colors.red : AppTheme.primaryGreen,
                                 ),
@@ -235,7 +235,7 @@ class CartDetailScreen extends ConsumerWidget {
                               Icon(
                                 Icons.shopping_basket_outlined,
                                 size: 60,
-                                color: Colors.grey.withOpacity(0.3),
+                                color: Colors.grey.withValues(alpha: 0.3),
                               ),
                               const SizedBox(height: 16),
                               Text(
@@ -331,7 +331,7 @@ class CartDetailScreen extends ConsumerWidget {
                               delay: Duration(milliseconds: index * 50),
                             ),
                       );
-                    }).toList(),
+                    }),
                   const SizedBox(height: 100),
                 ]),
               ),
@@ -439,7 +439,7 @@ class CartDetailScreen extends ConsumerWidget {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.grey.withOpacity(0.3),
+                    color: Colors.grey.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -485,10 +485,10 @@ class CartDetailScreen extends ConsumerWidget {
                               width: 40,
                               height: 40,
                               decoration: BoxDecoration(
-                                color: AppTheme.primaryGreen.withOpacity(0.1),
+                                color: AppTheme.primaryGreen.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(10),
                               ),
-                              child: Icon(
+                              child: const Icon(
                                 Icons.shopping_basket,
                                 color: AppTheme.primaryGreen,
                                 size: 20,
@@ -511,7 +511,7 @@ class CartDetailScreen extends ConsumerWidget {
                               ),
                             ),
                             Text(
-                              '₱${(stockItem['price'] as double).toStringAsFixed(2)}',
+                              '?${(stockItem['price'] as double).toStringAsFixed(2)}',
                               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                     fontWeight: FontWeight.w700,
                                   ),
@@ -547,7 +547,7 @@ class CartDetailScreen extends ConsumerWidget {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey.withOpacity(0.3),
+                  color: Colors.grey.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -563,7 +563,7 @@ class CartDetailScreen extends ConsumerWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.1),
+                  color: Colors.blue.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(Icons.edit, color: Colors.blue, size: 20),
@@ -580,7 +580,7 @@ class CartDetailScreen extends ConsumerWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: Colors.green.withOpacity(0.1),
+                  color: Colors.green.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(Icons.attach_money, color: Colors.green, size: 20),
@@ -597,7 +597,7 @@ class CartDetailScreen extends ConsumerWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: Colors.purple.withOpacity(0.1),
+                  color: Colors.purple.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(Icons.share, color: Colors.purple, size: 20),
@@ -606,9 +606,7 @@ class CartDetailScreen extends ConsumerWidget {
               trailing: const Icon(Icons.chevron_right, size: 20),
               onTap: () {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Share feature coming soon!')),
-                );
+                _shareCartAsText(context, cart);
               },
             ),
             const Divider(height: 32),
@@ -617,7 +615,7 @@ class CartDetailScreen extends ConsumerWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.1),
+                  color: Colors.red.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(Icons.delete, color: Colors.red, size: 20),
@@ -680,7 +678,7 @@ class CartDetailScreen extends ConsumerWidget {
           controller: budgetController,
           decoration: const InputDecoration(
             hintText: 'Budget amount',
-            prefixText: '₱ ',
+            prefixText: '? ',
           ),
           keyboardType: TextInputType.number,
         ),
@@ -740,6 +738,37 @@ class CartDetailScreen extends ConsumerWidget {
   }
 
 
+  void _shareCartAsText(BuildContext context, dynamic cart) {
+    final currencyFormat = NumberFormat.currency(locale: 'en_PH', symbol: '?');
+    final total = cart.items.fold<double>(
+        0, (sum, item) => sum + (item.estimatedPrice * item.quantity));
+
+    final buffer = StringBuffer();
+    buffer.writeln('?? ${cart.name}');
+    if (cart.storeName != null) buffer.writeln('?? ${cart.storeName}');
+    buffer.writeln('');
+    for (final item in cart.items) {
+      final status = item.isDone ? '?' : '?';
+      buffer.writeln(
+          '$status ${item.name}  �${item.quantity} ${item.unit}  ${currencyFormat.format(item.estimatedPrice * item.quantity)}');
+    }
+    buffer.writeln('');
+    buffer.writeln('Total: ${currencyFormat.format(total)}');
+    if (cart.budget != null) {
+      buffer.writeln('Budget: ${currencyFormat.format(cart.budget)}');
+    }
+
+    Clipboard.setData(ClipboardData(text: buffer.toString()));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Cart copied to clipboard � paste to share!'),
+        backgroundColor: Colors.purple,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
+  }
+
   void _showBarcodeScanner(BuildContext context, WidgetRef ref, String cartId) {
     final cartContext = context;
     Navigator.of(context).push(
@@ -766,11 +795,11 @@ class CartDetailScreen extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Row(
+        title: const Row(
           children: [
-            const Icon(Icons.qr_code, color: Colors.blue),
-            const SizedBox(width: 8),
-            const Text('Scanned Product'),
+            Icon(Icons.qr_code, color: Colors.blue),
+            SizedBox(width: 8),
+            Text('Scanned Product'),
           ],
         ),
         content: SingleChildScrollView(
@@ -823,8 +852,8 @@ class CartDetailScreen extends ConsumerWidget {
               TextField(
                 controller: priceController,
                 decoration: const InputDecoration(
-                  labelText: 'Price (₱)',
-                  prefixText: '₱ ',
+                  labelText: 'Price (?)',
+                  prefixText: '? ',
                   border: OutlineInputBorder(),
                 ),
                 keyboardType: TextInputType.number,
@@ -944,9 +973,6 @@ class CartDetailScreen extends ConsumerWidget {
     String cartId,
     Map<String, String> detectedText,
   ) {
-    print('=== SHOWING IMAGE RESULT DIALOG ===');
-    print('Detected text: $detectedText');
-    
     final nameController = TextEditingController(text: detectedText['name'] ?? '');
     final quantityController = TextEditingController(text: '1');
     final priceController = TextEditingController(text: detectedText['price'] ?? '0');
@@ -1044,8 +1070,8 @@ class CartDetailScreen extends ConsumerWidget {
               TextField(
                 controller: priceController,
                 decoration: const InputDecoration(
-                  labelText: 'Price (₱)',
-                  prefixText: '₱ ',
+                  labelText: 'Price (?)',
+                  prefixText: '? ',
                   border: OutlineInputBorder(),
                   helperText: 'Edit if needed',
                 ),
@@ -1057,27 +1083,18 @@ class CartDetailScreen extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () {
-              print('Cancel button pressed');
               Navigator.pop(dialogContext);
             },
             child: const Text('Cancel'),
           ),
           ElevatedButton(
             onPressed: () {
-              print('=== ADD ITEM BUTTON TAPPED ===');
-              
               final name = nameController.text.trim();
               final price = priceController.text.trim();
               final quantity = quantityController.text.trim();
-              
-              print('Name: "$name"');
-              print('Price: "$price"');
-              print('Quantity: "$quantity"');
-              print('Unit: "$selectedUnit"');
-              
+
               // Validate name
               if (name.isEmpty) {
-                print('ERROR: Name is empty');
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Please enter a product name'),
@@ -1091,12 +1108,10 @@ class CartDetailScreen extends ConsumerWidget {
               // Validate and fix price
               double parsedPrice;
               if (price.isEmpty || price == '0') {
-                print('WARNING: Price is empty or 0, setting default 1.0');
                 parsedPrice = 1.0;
               } else {
                 final tryPrice = double.tryParse(price);
                 if (tryPrice == null) {
-                  print('ERROR: Price cannot be parsed: "$price"');
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text('Please enter a valid price (numbers only)'),
@@ -1108,11 +1123,10 @@ class CartDetailScreen extends ConsumerWidget {
                 }
                 parsedPrice = tryPrice;
               }
-              
+
               // Validate quantity
               final parsedQuantity = double.tryParse(quantity);
               if (parsedQuantity == null || parsedQuantity <= 0) {
-                print('ERROR: Quantity is invalid');
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Please enter a valid quantity'),
@@ -1122,10 +1136,7 @@ class CartDetailScreen extends ConsumerWidget {
                 );
                 return;
               }
-              
-              print('All validations passed!');
-              print('Creating item with: name=$name, qty=$parsedQuantity, unit=$selectedUnit, price=$parsedPrice');
-              
+
               try {
                 final item = ShoppingItem(
                   id: const Uuid().v4(),
@@ -1135,19 +1146,13 @@ class CartDetailScreen extends ConsumerWidget {
                   unit: selectedUnit,
                   estimatedPrice: parsedPrice,
                 );
-                
-                print('Item created successfully');
-                print('Adding to cart: $cartId');
-                
+
                 // Use the captured notifier instead of ref
                 listNotifier.addItem(cartId, item);
 
-                print('Item added to provider');
-                
                 // Close dialog
                 Navigator.pop(dialogContext);
-                print('Dialog closed');
-                
+
                 // Show success message on the parent context
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -1156,7 +1161,7 @@ class CartDetailScreen extends ConsumerWidget {
                     duration: const Duration(seconds: 2),
                   ),
                 );
-                
+
                 // Show dialog to choose next action
                 showDialog(
                   context: context,
@@ -1186,12 +1191,7 @@ class CartDetailScreen extends ConsumerWidget {
                     ],
                   ),
                 );
-                
-                print('=== SUCCESS ===');
-              } catch (e, stackTrace) {
-                print('=== ERROR ===');
-                print('Error: $e');
-                print('Stack trace: $stackTrace');
+              } catch (e) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text('Error adding item: $e'),
@@ -1284,7 +1284,7 @@ class _BarcodeScannerScreenState extends State<_BarcodeScannerScreen> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.7),
+                  color: Colors.black.withValues(alpha: 0.7),
                   borderRadius: BorderRadius.circular(30),
                 ),
                 child: const Text(
@@ -1370,6 +1370,34 @@ class _ImageCaptureScreenState extends State<_ImageCaptureScreen> {
     }
   }
 
+  Future<void> _pickFromGallery() async {
+    Map<String, String>? result;
+    try {
+      final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+      if (image == null) return;
+      setState(() => _isProcessing = true);
+      if (ApiConfig.isClaudeVisionEnabled) {
+        result = await _extractWithClaudeVision(image.path);
+      }
+      result ??= await _extractWithMlKit(image.path);
+    } catch (e) {
+      result = null;
+    }
+    if (!mounted) return;
+    setState(() => _isProcessing = false);
+    if (result != null) {
+      Navigator.pop(context);
+      widget.onImageCaptured(result);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Could not process image. Please try again.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   /// Extract price and name using Claude Vision API
   Future<Map<String, String>?> _extractWithClaudeVision(String imagePath) async {
     try {
@@ -1418,7 +1446,7 @@ Extract ONLY:
 
 Rules:
 - Product name: be specific, include brand and variant if visible (e.g. "Alaska Evaporated Milk 370ml" not just "Milk")
-- Price: numeric value only, no currency symbols (e.g. "85.00" not "₱85.00")
+- Price: numeric value only, no currency symbols (e.g. "85.00" not "?85.00")
 - If you see multiple prices (original + sale), use the SALE/CURRENT price
 - If you cannot clearly read the name or price, use "unknown"
 
@@ -1458,12 +1486,6 @@ Respond ONLY with valid JSON, no explanation:
             price.isNotEmpty &&
             price != '0' &&
             price.toLowerCase() != 'unknown') {
-          
-          print('=== CLAUDE VISION SUCCESS ===');
-          print('Name: $name');
-          print('Price: $price');
-          print('============================');
-          
           return {
             'name': name,
             'price': price,
@@ -1475,7 +1497,6 @@ Respond ONLY with valid JSON, no explanation:
 
       return null; // Triggers fallback
     } catch (e) {
-      print('Claude Vision error: $e');
       return null; // Triggers fallback
     }
   }
@@ -1499,12 +1520,7 @@ Respond ONLY with valid JSON, no explanation:
           allLines.add(line.text);
         }
       }
-      
-      // Debug: Show detected text
-      print('=== ML KIT FALLBACK ===');
-      print(fullText);
-      print('=======================');
-      
+
       // Parse price and name with structured data
       final result = _extractPriceAndName(fullText, allLines);
       result['_source'] = 'mlkit_fallback';
@@ -1532,36 +1548,36 @@ Respond ONLY with valid JSON, no explanation:
 
     String? extractedPrice;
 
-    // Helper â€” validates a parsed price is in realistic PH range
+    // Helper — validates a parsed price is in realistic PH range
     bool isValidPrice(double val) => val >= 5.0 && val <= 50000.0;
 
-    // Normalize: swap comma-decimal European style â†’ dot
+    // Normalize: swap comma-decimal European style → dot
     String normalizeDecimal(String s) => s.replaceAll(',', '.');
 
-    // Priority 1 â€” ₱ or P followed by digits WITH decimals
-    // e.g. ₱85.00 | P 120.50 | ₱ 1,250.00
-    final p1 = RegExp(r'[₱P]\s*([\d,]{1,7}\.\d{2})', caseSensitive: false);
+    // Priority 1 — ? or P followed by digits WITH decimals
+    // e.g. ?85.00 | P 120.50 | ? 1,250.00
+    final p1 = RegExp(r'[?P]\s*([\d,]{1,7}\.\d{2})', caseSensitive: false);
 
-    // Priority 2 â€” keyword labels + optional ₱/P + price
-    // e.g. Price: 85.00 | Amount: ₱120 | Total 45.50
+    // Priority 2 — keyword labels + optional ?/P + price
+    // e.g. Price: 85.00 | Amount: ?120 | Total 45.50
     final p2 = RegExp(
-      r'(?:price|presyo|amount|total|subtotal|halaga)[\s:]*[₱P]?\s*([\d,]{1,7}(?:\.\d{2})?)',
+      r'(?:price|presyo|amount|total|subtotal|halaga)[\s:]*[?P]?\s*([\d,]{1,7}(?:\.\d{2})?)',
       caseSensitive: false,
     );
 
-    // Priority 3 â€” ₱ or P + whole number (no decimals)
-    // e.g. ₱85 | P 150
-    final p3 = RegExp(r'[₱P]\s*(\d{1,6})(?!\d|\.)', caseSensitive: false);
+    // Priority 3 — ? or P + whole number (no decimals)
+    // e.g. ?85 | P 150
+    final p3 = RegExp(r'[?P]\s*(\d{1,6})(?!\d|\.)', caseSensitive: false);
 
-    // Priority 4 â€” number followed by peso/php suffix
+    // Priority 4 — number followed by peso/php suffix
     // e.g. 85 pesos | 75 php
     final p4 = RegExp(
       r'(\d{1,6}(?:\.\d{2})?)\s*(?:pesos?|php)',
       caseSensitive: false,
     );
 
-    // Priority 5 â€” LAST RESORT: standalone decimal number
-    // e.g. 85.00 â€” risky, only use if nothing else matched
+    // Priority 5 — LAST RESORT: standalone decimal number
+    // e.g. 85.00 — risky, only use if nothing else matched
     final p5 = RegExp(r'\b(\d{1,4}\.\d{2})\b');
 
     for (final pattern in [p1, p2, p3, p4, p5]) {
@@ -1600,7 +1616,7 @@ Respond ONLY with valid JSON, no explanation:
       'etvwt', 'net wt', 'netwt', 'sku', 'item code', 'barcode',
     ];
 
-    // Product words that boost score â€” expanded for PH grocery
+    // Product words that boost score — expanded for PH grocery
     const productWords = [
       // English grocery basics
       'milk', 'bread', 'rice', 'egg', 'eggs', 'chicken', 'pork', 'beef',
@@ -1616,7 +1632,7 @@ Respond ONLY with valid JSON, no explanation:
       'baboy', 'baka', 'isda', 'bangus', 'tilapia', 'galunggong',
       'liempo', 'lechon', 'longganisa', 'tocino', 'tapa',
       'pandesal', 'hopia', 'polvoron', 'bibingka', 'gulaman',
-      // PH brands (partial â€” boosts if line contains these)
+      // PH brands (partial — boosts if line contains these)
       'datu', 'century', 'del monte', 'ufc', 'mama sita', 'mamasita',
       'ajinomoto', 'maggi', 'knorr', 'lucky me', 'payless', 'monde',
       'rebisco', 'fita', 'skyflakes', 'milo', 'nescafe', 'kopiko',
@@ -1631,7 +1647,7 @@ Respond ONLY with valid JSON, no explanation:
     final barcodePattern = RegExp(r'\d{12,}');
     final datePattern = RegExp(r'\d{1,2}[/\-]\d{1,2}[/\-]\d{2,4}');
     final pureDigitPattern = RegExp(r'^\d+$');
-    final priceOnlyPattern = RegExp(r'^[₱P\d\s.,]+$');
+    final priceOnlyPattern = RegExp(r'^[?P\d\s.,]+$');
     final codePattern = RegExp(r'^[A-Z]{2,}\s*[.\s]*\s*\d+$', caseSensitive: false); // ETVWT. 500
 
     String? bestName;
@@ -1649,7 +1665,7 @@ Respond ONLY with valid JSON, no explanation:
       if (codePattern.hasMatch(line)) continue; // Skip code patterns like "ETVWT. 500"
       if (skipKeywords.any((kw) => lower.contains(kw))) continue;
 
-      // Digit ratio check â€” skip if >60% digits (e.g. "12/25/2024", codes)
+      // Digit ratio check — skip if >60% digits (e.g. "12/25/2024", codes)
       final digitCount = line.replaceAll(RegExp(r'[^\d]'), '').length;
       if (line.isNotEmpty && digitCount / line.length > 0.6) continue;
 
@@ -1659,16 +1675,18 @@ Respond ONLY with valid JSON, no explanation:
       // --- Scoring ---
       int score = 0;
 
-      // Weight/volume/unit indicators â€” strong signal it's a product
+      // Weight/volume/unit indicators — strong signal it's a product
       if (RegExp(
         r'\b(\d+\s*(?:g|kg|ml|l|oz|lb|pcs|pc|pack|sachet|pouch|can|bottle|box|grams?|liters?|kilos?))\b',
         caseSensitive: false,
-      ).hasMatch(line)) score += 15;
+      ).hasMatch(line)) {
+        score += 15;
+      }
 
       // Mixed case = brand/product name pattern
       if (RegExp(r'[A-Z][a-z]+').hasMatch(line)) score += 5;
 
-      // Reasonable product name length (8â€“60 chars is ideal)
+      // Reasonable product name length (8–60 chars is ideal)
       if (line.length >= 8 && line.length <= 60) score += 5;
       if (line.length < 8) score -= 3;
       if (line.length > 80) score -= 5;
@@ -1676,13 +1694,13 @@ Respond ONLY with valid JSON, no explanation:
       // Contains product keywords (any match = bonus)
       if (productWords.any((w) => lower.contains(w))) score += 10;
 
-      // ALL CAPS short line â€” likely a label/header, slight penalty
+      // ALL CAPS short line — likely a label/header, slight penalty
       if (line == line.toUpperCase() && line.length < 20) score -= 3;
 
-      // Has dots â€” brand name pattern (e.g. "S&W", "C2")
+      // Has dots — brand name pattern (e.g. "S&W", "C2")
       if (line.contains('.') && !priceOnlyPattern.hasMatch(line)) score += 2;
 
-      // Starts with capital â€” good sign
+      // Starts with capital — good sign
       if (RegExp(r'^[A-Z]').hasMatch(line)) score += 3;
 
       // Contains brand names - extra boost
@@ -1701,10 +1719,10 @@ Respond ONLY with valid JSON, no explanation:
     if (bestName != null) {
       // Remove trailing price patterns
       bestName = bestName
-          .replaceAll(RegExp(r'\s*[₱P]\s*\d+[.,]?\d*\s*$'), '')
+          .replaceAll(RegExp(r'\s*[?P]\s*\d+[.,]?\d*\s*$'), '')
           .replaceAll(RegExp(r'\s*\d+\.\d{2}\s*$'), '')
           // Remove leading/trailing non-word characters
-          .replaceAll(RegExp(r'^[^\w₱]+|[^\w₱]+$'), '')
+          .replaceAll(RegExp(r'^[^\w?]+|[^\w?]+$'), '')
           .trim();
 
       if (bestName.isEmpty) bestName = null;
@@ -1748,18 +1766,18 @@ Respond ONLY with valid JSON, no explanation:
                       children: [
                         Text('For best results:', style: TextStyle(fontWeight: FontWeight.bold)),
                         SizedBox(height: 8),
-                        Text('âœ“ Use good lighting'),
-                        Text('âœ“ Hold phone steady'),
-                        Text('âœ“ Fill frame with price tag'),
-                        Text('âœ“ Keep text straight'),
-                        Text('âœ“ Tap to focus'),
+                        Text('✓ Use good lighting'),
+                        Text('✓ Hold phone steady'),
+                        Text('✓ Fill frame with price tag'),
+                        Text('✓ Keep text straight'),
+                        Text('✓ Tap to focus'),
                         SizedBox(height: 12),
                         Text('Avoid:', style: TextStyle(fontWeight: FontWeight.bold)),
                         SizedBox(height: 8),
-                        Text('âœ— Blurry photos'),
-                        Text('âœ— Shadows or glare'),
-                        Text('âœ— Tilted angles'),
-                        Text('âœ— Low light'),
+                        Text('✗ Blurry photos'),
+                        Text('✗ Shadows or glare'),
+                        Text('✗ Tilted angles'),
+                        Text('✗ Low light'),
                       ],
                     ),
                   ),
@@ -1810,7 +1828,7 @@ Respond ONLY with valid JSON, no explanation:
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: AppTheme.primaryGreen.withOpacity(0.4),
+                          color: AppTheme.primaryGreen.withValues(alpha: 0.4),
                           blurRadius: 30,
                           offset: const Offset(0, 10),
                         ),
@@ -1846,9 +1864,9 @@ Respond ONLY with valid JSON, no explanation:
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.blue.withOpacity(0.1),
+                            color: Colors.blue.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.blue.withOpacity(0.3)),
+                            border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -1886,41 +1904,7 @@ Respond ONLY with valid JSON, no explanation:
                   ),
                   const SizedBox(height: 16),
                   TextButton.icon(
-                    onPressed: () async {
-                      try {
-                        final XFile? image = await _picker.pickImage(
-                          source: ImageSource.gallery,
-                        );
-                        if (image != null) {
-                          setState(() => _isProcessing = true);
-                          
-                          // Try Claude Vision first if API key is configured
-                          Map<String, String>? result;
-                          if (ApiConfig.isClaudeVisionEnabled) {
-                            result = await _extractWithClaudeVision(image.path);
-                          }
-
-                          // Fallback to ML Kit + regex if Claude fails or not configured
-                          result ??= await _extractWithMlKit(image.path);
-                          
-                          if (mounted) {
-                            setState(() => _isProcessing = false);
-                            Navigator.pop(context);
-                            widget.onImageCaptured(result);
-                          }
-                        }
-                      } catch (e) {
-                        if (mounted) {
-                          setState(() => _isProcessing = false);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Error processing image: $e'),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
-                        }
-                      }
-                    },
+                    onPressed: () => _pickFromGallery(),
                     icon: const Icon(Icons.photo_library),
                     label: const Text('Choose from Gallery'),
                     style: TextButton.styleFrom(

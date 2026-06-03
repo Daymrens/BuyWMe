@@ -57,14 +57,14 @@ class _GroceryMateAppState extends ConsumerState<GroceryMateApp> {
         debugShowCheckedModeBanner: false,
         home: Scaffold(
           body: Container(
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [const Color(0xFF0A0E21), const Color(0xFF1D1F33)],
+                colors: [Color(0xFF0A0E21), Color(0xFF1D1F33)],
               ),
             ),
-            child: Center(
+            child: const Center(
               child: CircularProgressIndicator(
                 color: AppTheme.primaryGreen,
               ),
@@ -166,7 +166,7 @@ class ScaffoldWithNavBar extends StatelessWidget {
           borderRadius: BorderRadius.circular(30),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.2),
+              color: Colors.black.withValues(alpha: 0.2),
               blurRadius: 20,
               offset: const Offset(0, 10),
             ),
@@ -179,13 +179,13 @@ class ScaffoldWithNavBar extends StatelessWidget {
             child: Container(
               decoration: BoxDecoration(
                 color: isDark
-                    ? Colors.black.withOpacity(0.3)
-                    : Colors.white.withOpacity(0.7),
+                    ? Colors.black.withValues(alpha: 0.3)
+                    : Colors.white.withValues(alpha: 0.7),
                 borderRadius: BorderRadius.circular(30),
                 border: Border.all(
                   color: isDark
-                      ? Colors.white.withOpacity(0.1)
-                      : Colors.white.withOpacity(0.3),
+                      ? Colors.white.withValues(alpha: 0.1)
+                      : Colors.white.withValues(alpha: 0.3),
                 ),
               ),
               child: NavigationBar(
@@ -196,7 +196,7 @@ class ScaffoldWithNavBar extends StatelessWidget {
                 },
                 backgroundColor: Colors.transparent,
                 elevation: 0,
-                indicatorColor: AppTheme.primaryGreen.withOpacity(0.2),
+                indicatorColor: AppTheme.primaryGreen.withValues(alpha: 0.2),
                 destinations: const [
                   NavigationDestination(
                     icon: Icon(Icons.home_outlined),

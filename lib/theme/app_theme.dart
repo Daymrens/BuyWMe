@@ -36,10 +36,8 @@ class AppTheme {
         primary: primaryGreen,
         secondary: gradientEnd,
         surface: darkSurface,
-        background: darkBg,
         surfaceBright: darkSurfaceVariant,
         surfaceDim: darkBg,
-        onBackground: darkText,
         onSurface: darkText,
       ),
       textTheme: TextTheme(
@@ -112,7 +110,7 @@ class AppTheme {
       cardTheme: CardThemeData(
         elevation: 0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        color: darkSurface.withOpacity(0.6),
+        color: darkSurface.withValues(alpha: 0.6),
       ),
       appBarTheme: AppBarTheme(
         backgroundColor: Colors.transparent,
@@ -131,14 +129,14 @@ class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: darkSurface.withOpacity(0.5),
+        fillColor: darkSurface.withValues(alpha: 0.5),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: darkTextSecondary.withOpacity(0.2)),
+          borderSide: BorderSide(color: darkTextSecondary.withValues(alpha: 0.2)),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: darkTextSecondary.withOpacity(0.2)),
+          borderSide: BorderSide(color: darkTextSecondary.withValues(alpha: 0.2)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -146,7 +144,7 @@ class AppTheme {
         ),
       ),
       chipTheme: ChipThemeData(
-        backgroundColor: darkSurface.withOpacity(0.5),
+        backgroundColor: darkSurface.withValues(alpha: 0.5),
         labelStyle: const TextStyle(color: darkText),
         selectedColor: primaryGreen,
       ),
@@ -163,10 +161,8 @@ class AppTheme {
         primary: primaryGreen,
         secondary: gradientEnd,
         surface: lightSurface,
-        background: lightBg,
         surfaceBright: lightSurface,
         surfaceDim: lightBg,
-        onBackground: lightText,
         onSurface: lightText,
       ),
       textTheme: TextTheme(
@@ -239,7 +235,7 @@ class AppTheme {
       cardTheme: CardThemeData(
         elevation: 0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        color: lightSurface.withOpacity(0.9),
+        color: lightSurface.withValues(alpha: 0.9),
       ),
       appBarTheme: AppBarTheme(
         backgroundColor: Colors.transparent,
@@ -272,9 +268,9 @@ class AppTheme {
           borderSide: const BorderSide(color: primaryGreen),
         ),
       ),
-      chipTheme: ChipThemeData(
+      chipTheme: const ChipThemeData(
         backgroundColor: lightSurfaceVariant,
-        labelStyle: const TextStyle(color: lightText),
+        labelStyle: TextStyle(color: lightText),
         selectedColor: primaryGreen,
       ),
     );
@@ -291,17 +287,17 @@ class AppTheme {
     return BoxDecoration(
       borderRadius: BorderRadius.circular(20),
       color: isDark 
-          ? Colors.white.withOpacity(0.05)
-          : Colors.white.withOpacity(0.7),
+          ? Colors.white.withValues(alpha: 0.05)
+          : Colors.white.withValues(alpha: 0.7),
       border: Border.all(
         color: isDark 
-            ? Colors.white.withOpacity(0.1)
-            : Colors.white.withOpacity(0.3),
+            ? Colors.white.withValues(alpha: 0.1)
+            : Colors.white.withValues(alpha: 0.3),
         width: 1,
       ),
       boxShadow: [
         BoxShadow(
-          color: Colors.black.withOpacity(0.1),
+          color: Colors.black.withValues(alpha: 0.1),
           blurRadius: 20,
           offset: const Offset(0, 10),
         ),
