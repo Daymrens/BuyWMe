@@ -1,0 +1,315 @@
+// ============================================================
+// UPGRADED: Claude Vision-powered price tag scanner
+// Replaces _captureAndProcessImage() and _extractPriceAndName()
+//
+// HOW IT WORKS:
+// 1. Capture image (camera or gallery)
+// 2. Send image as base64 to Claude Vision API
+// 3. Claude reads tag visually → returns JSON { name, price }
+// 4. If API fails → falls back to ML Kit + regex
+//
+// SETUP:
+// Add to pubspec.yaml:
+//   http: ^1.2.1
+//
+// Your image_picker and google_mlkit_text_recognition stay as-is.
+// ============================================================
+
+import 'dart:convert';
+import 'dart:io';
+import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
+import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
+import 'package:flutter/services.dart';
+
+// ---- PASTE THIS INSIDE _ImageCaptureScreenState ----------------
+
+final ImagePicker _picker = ImagePicker();
+
+// ---------------------------------------------------------------
+// MAIN CAPTURE METHOD — replace your existing one with this
+// ---------------------------------------------------------------
+
+Future<void> _captureAndProcessImage({bool fromGallery = false}) async {
+  setState(() => _isProcessing = true);
+
+  try {
+    final XFile? image = await _picker.pickImage(
+      source: fromGallery ? ImageSource.gallery : ImageSource.camera,
+      imageQuality: 85,   // ML Kit sweet spot
+      maxWidth: 1200,
+      maxHeight: 1200,
+      preferredCameraDevice: CameraDevice.rear,
+    );
+
+    if (image == null) {
+      setState(() => _isProcessing = false);
+      return;
+    }
+
+    // Try Claude Vision first — most accurate for all tag types
+    Map<String, String>? result = await _extractWithClaudeVision(image.path);
+
+    // Fallback to ML Kit + regex if Claude fails
+    result ??= await _extractWithMlKit(image.path);
+
+    HapticFeedback.mediumImpact();
+    widget.onImageCaptured(result);
+  } catch (e) {
+    setState(() => _isProcessing = false);
+    // Show error snackbar if needed
+  }
+}
+
+// ---------------------------------------------------------------
+// METHOD 1: CLAUDE VISION (primary — handles all 4 tag types)
+// ---------------------------------------------------------------
+
+Future<Map<String, String>?> _extractWithClaudeVision(String imagePath) async {
+  try {
+    final bytes = await File(imagePath).readAsBytes();
+    final base64Image = base64Encode(bytes);
+
+    // Detect image type
+    final ext = imagePath.split('.').last.toLowerCase();
+    final mediaType = ext == 'png' ? 'image/png' : 'image/jpeg';
+
+    final response = await http.post(
+      Uri.parse('https://api.anthropic.com/v1/messages'),
+      headers: {
+        'Content-Type': 'application/json',
+        'anthropic-version': '2023-06-01',
+      },
+      body: jsonEncode({
+        'model': 'claude-sonnet-4-20250514',
+        'max_tokens': 256,
+        'messages': [
+          {
+            'role': 'user',
+            'content': [
+              {
+                'type': 'image',
+                'source': {
+                  'type': 'base64',
+                  'media_type': mediaType,
+                  'data': base64Image,
+                },
+              },
+              {
+                'type': 'text',
+                'text': '''You are a grocery price tag reader for a Philippine supermarket app.
+
+Look at this image carefully. It may be a:
+- Printed supermarket shelf label
+- Handwritten price tag
+- Digital/LCD price display
+- Thermal receipt
+
+Extract ONLY:
+1. The product name (the item being sold, not the store name)
+2. The price in Philippine Peso (PHP)
+
+Rules:
+- Product name: be specific, include brand and variant if visible (e.g. "Alaska Evaporated Milk 370ml" not just "Milk")
+- Price: numeric value only, no currency symbols (e.g. "85.00" not "₱85.00")
+- If you see multiple prices (original + sale), use the SALE/CURRENT price
+- If you cannot clearly read the name or price, use "unknown"
+
+Respond ONLY with valid JSON, no explanation:
+{"name": "product name here", "price": "00.00"}'''
+              }
+            ]
+          }
+        ],
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final text = (data['content'] as List)
+          .firstWhere((b) => b['type'] == 'text')['text'] as String;
+
+      // Strip markdown fences if present
+      final clean = text
+          .replaceAll(RegExp(r'```json|```'), '')
+          .trim();
+
+      final parsed = jsonDecode(clean) as Map<String, dynamic>;
+      final name = (parsed['name'] as String?)?.trim() ?? '';
+      final price = (parsed['price'] as String?)?.trim() ?? '';
+
+      // Validate response is useful
+      if (name.isNotEmpty &&
+          name.toLowerCase() != 'unknown' &&
+          price.isNotEmpty &&
+          price != '0' &&
+          price.toLowerCase() != 'unknown') {
+        return {
+          'name': name,
+          'price': price,
+          '_source': 'claude_vision',
+        };
+      }
+    }
+
+    return null; // Triggers fallback
+  } catch (_) {
+    return null; // Triggers fallback
+  }
+}
+
+// ---------------------------------------------------------------
+// METHOD 2: ML KIT + REGEX FALLBACK
+// ---------------------------------------------------------------
+
+Future<Map<String, String>> _extractWithMlKit(String imagePath) async {
+  final inputImage = InputImage.fromFilePath(imagePath);
+  final textRecognizer = TextRecognizer();
+
+  try {
+    final RecognizedText recognizedText =
+        await textRecognizer.processImage(inputImage);
+
+    final allLines = <String>[];
+    for (final block in recognizedText.blocks) {
+      for (final line in block.lines) {
+        allLines.add(line.text);
+      }
+    }
+
+    final result = _extractPriceAndName(recognizedText.text, allLines);
+    result['_source'] = 'mlkit_fallback';
+    return result;
+  } finally {
+    await textRecognizer.close();
+  }
+}
+
+// ---------------------------------------------------------------
+// REGEX FALLBACK PARSER (kept as safety net)
+// ---------------------------------------------------------------
+
+Map<String, String> _extractPriceAndName(
+  String text, [
+  List<String>? structuredLines,
+]) {
+  final lines = structuredLines ?? text.split('\n');
+  final cleanLines =
+      lines.map((l) => l.trim()).where((l) => l.isNotEmpty).toList();
+
+  // --- PRICE ---
+  String? extractedPrice;
+
+  bool isValidPrice(double val) => val >= 5.0 && val <= 50000.0;
+  String normalizeDecimal(String s) => s.replaceAll(',', '.');
+
+  final pricePatterns = [
+    RegExp(r'[₱P]\s*([\d,]{1,7}\.\d{2})', caseSensitive: false),
+    RegExp(
+      r'(?:price|presyo|amount|total|subtotal|halaga)[\s:]*[₱P]?\s*([\d,]{1,7}(?:\.\d{2})?)',
+      caseSensitive: false,
+    ),
+    RegExp(r'[₱P]\s*(\d{1,6})(?!\d|\.)', caseSensitive: false),
+    RegExp(r'(\d{1,6}(?:\.\d{2})?)\s*(?:pesos?|php)', caseSensitive: false),
+    RegExp(r'\b(\d{1,4}\.\d{2})\b'), // last resort
+  ];
+
+  for (final pattern in pricePatterns) {
+    for (final line in cleanLines) {
+      final match = pattern.firstMatch(line);
+      if (match != null) {
+        final raw = normalizeDecimal(match.group(1)!.replaceAll(',', ''));
+        final val = double.tryParse(raw);
+        if (val != null && isValidPrice(val)) {
+          extractedPrice = val.toStringAsFixed(2);
+          break;
+        }
+      }
+    }
+    if (extractedPrice != null) break;
+  }
+
+  // --- NAME ---
+  const skipKeywords = [
+    'puregold', 'sm supermarket', 'sm market', 'sm hypermarket',
+    'robinsons', 'landers', 'savemore', 'waltermart', 'shopwise',
+    'alfamart', 'ministop', '7-eleven', 'family mart', 'lawson',
+    'price', 'presyo', 'amount', 'total', 'subtotal', 'change',
+    'cash', 'thank you', 'receipt', 'resibo', 'date', 'time',
+    'cashier', 'tin', 'vat', 'tax', 'discount', 'sale', 'promo',
+    'member', 'card', 'branch', 'store', 'address', 'tel',
+    'phone', 'website', 'www', 'transaction', 'ref no',
+  ];
+
+  const productWords = [
+    'milk', 'bread', 'rice', 'egg', 'eggs', 'chicken', 'pork', 'beef',
+    'fish', 'oil', 'sugar', 'salt', 'coffee', 'tea', 'juice', 'water',
+    'butter', 'cheese', 'flour', 'vinegar', 'sauce', 'noodles', 'pasta',
+    'tuna', 'sardines', 'canned', 'frozen', 'fresh', 'organic',
+    'instant', 'dried', 'powder', 'condensed', 'evaporated',
+    'shampoo', 'soap', 'detergent', 'lotion', 'toothpaste',
+    'bawang', 'sibuyas', 'kamatis', 'gata', 'bagoong', 'patis',
+    'suka', 'toyo', 'asin', 'asukal', 'bigas', 'itlog', 'manok',
+    'baboy', 'baka', 'isda', 'bangus', 'tilapia', 'galunggong',
+    'liempo', 'longganisa', 'tocino', 'tapa', 'pandesal',
+    'datu', 'century', 'del monte', 'ufc', 'mamasita',
+    'ajinomoto', 'maggi', 'knorr', 'lucky me', 'payless', 'monde',
+    'rebisco', 'fita', 'skyflakes', 'milo', 'nescafe', 'kopiko',
+    'alaska', 'magnolia', 'selecta', 'nestea', 'c2', 'tang',
+    'ariel', 'tide', 'surf', 'champion', 'joy', 'domex',
+    'safeguard', 'palmolive', 'colgate', 'closeup', 'hapee',
+  ];
+
+  final barcodeRe = RegExp(r'\d{12,}');
+  final dateRe = RegExp(r'\d{1,2}[/\-]\d{1,2}[/\-]\d{2,4}');
+  final pureDigitRe = RegExp(r'^\d+$');
+  final priceOnlyRe = RegExp(r'^[₱P\d\s.,]+$');
+
+  String? bestName;
+  int bestScore = -999;
+
+  for (final line in cleanLines) {
+    final lower = line.toLowerCase();
+    if (line.length < 3) continue;
+    if (barcodeRe.hasMatch(line)) continue;
+    if (pureDigitRe.hasMatch(line)) continue;
+    if (priceOnlyRe.hasMatch(line)) continue;
+    if (dateRe.hasMatch(line)) continue;
+    if (skipKeywords.any((kw) => lower.contains(kw))) continue;
+
+    final digitCount = line.replaceAll(RegExp(r'[^\d]'), '').length;
+    if (line.isNotEmpty && digitCount / line.length > 0.6) continue;
+
+    int score = 0;
+    if (RegExp(
+      r'\b(\d+\s*(?:g|kg|ml|l|oz|lb|pcs|pc|pack|sachet|pouch|can|bottle|box|grams?|liters?|kilos?))\b',
+      caseSensitive: false,
+    ).hasMatch(line)) score += 15;
+    if (RegExp(r'[A-Z][a-z]+').hasMatch(line)) score += 5;
+    if (line.length >= 8 && line.length <= 60) score += 5;
+    if (line.length < 8) score -= 3;
+    if (line.length > 80) score -= 5;
+    if (productWords.any((w) => lower.contains(w))) score += 10;
+    if (line == line.toUpperCase() && line.length < 20) score -= 3;
+    if (RegExp(r'^[A-Z]').hasMatch(line)) score += 3;
+
+    if (score > bestScore) {
+      bestScore = score;
+      bestName = line;
+    }
+  }
+
+  if (bestName != null) {
+    bestName = bestName
+        .replaceAll(RegExp(r'\s*[₱P]\s*\d+[.,]?\d*\s*$'), '')
+        .replaceAll(RegExp(r'\s*\d+\.\d{2}\s*$'), '')
+        .replaceAll(RegExp(r'^[^\w₱]+|[^\w₱]+$'), '')
+        .trim();
+    if (bestName.isEmpty) bestName = null;
+  }
+
+  return {
+    'name': bestName ?? 'Unknown Product',
+    'price': extractedPrice ?? '0',
+  };
+}

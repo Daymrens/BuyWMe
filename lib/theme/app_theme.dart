@@ -23,6 +23,39 @@ class AppTheme {
   static const lightText = Colors.black87;
   static const lightTextSecondary = Color(0xFF757575);
 
+  // Spacing Scale (Design System)
+  static const double spacing4 = 4.0;
+  static const double spacing8 = 8.0;
+  static const double spacing12 = 12.0;
+  static const double spacing16 = 16.0;
+  static const double spacing20 = 20.0;
+  static const double spacing24 = 24.0;
+  static const double spacing32 = 32.0;
+  static const double spacing40 = 40.0;
+  static const double spacing48 = 48.0;
+
+  // Border Radius Scale
+  static const double radiusSmall = 12.0;
+  static const double radiusMedium = 16.0;
+  static const double radiusLarge = 20.0;
+  static const double radiusXLarge = 30.0;
+
+  // Icon Sizes
+  static const double iconSizeSmall = 20.0;
+  static const double iconSizeMedium = 24.0;
+  static const double iconSizeLarge = 28.0;
+  static const double iconSizeXLarge = 32.0;
+
+  // Avatar/Circle Sizes
+  static const double avatarSizeSmall = 40.0;
+  static const double avatarSizeMedium = 60.0;
+  static const double avatarSizeLarge = 90.0;
+
+  // Card Heights
+  static const double cardHeightSmall = 100.0;
+  static const double cardHeightMedium = 140.0;
+  static const double cardHeightLarge = 200.0;
+
   static ThemeData get darkTheme => _buildDarkTheme();
   static ThemeData get lightTheme => _buildLightTheme();
 

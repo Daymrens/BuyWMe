@@ -1,0 +1,208 @@
+// ============================================================
+// FIXED: _extractPriceAndName()
+// Drop-in replacement inside _ImageCaptureScreenState
+// or wherever you currently have the original method.
+// ============================================================
+
+/// Also replace your image capture settings with this:
+///
+/// final XFile? image = await _picker.pickImage(
+///   source: ImageSource.camera,
+///   imageQuality: 85,      // was 100 — ML Kit prefers compressed
+///   maxWidth: 1200,        // was 2048 — sweet spot for accuracy
+///   maxHeight: 1200,
+///   preferredCameraDevice: CameraDevice.rear,
+/// );
+
+Map<String, String> _extractPriceAndName(
+  String text, [
+  List<String>? structuredLines,
+]) {
+  final lines = structuredLines ?? text.split('\n');
+  final cleanLines = lines
+      .map((l) => l.trim())
+      .where((l) => l.isNotEmpty)
+      .toList();
+
+  // ----------------------------------------------------------
+  // STEP 1: PRICE EXTRACTION (fixed priority order)
+  // ----------------------------------------------------------
+
+  String? extractedPrice;
+
+  // Helper — validates a parsed price is in realistic PH range
+  bool isValidPrice(double val) => val >= 5.0 && val <= 50000.0;
+
+  // Normalize: swap comma-decimal European style → dot
+  String normalizeDecimal(String s) => s.replaceAll(',', '.');
+
+  // Priority 1 — ₱ or P followed by digits WITH decimals
+  // e.g. ₱85.00 | P 120.50 | ₱ 1,250.00
+  final p1 = RegExp(r'[₱P]\s*([\d,]{1,7}\.\d{2})', caseSensitive: false);
+
+  // Priority 2 — keyword labels + optional ₱/P + price
+  // e.g. Price: 85.00 | Amount: ₱120 | Total 45.50
+  final p2 = RegExp(
+    r'(?:price|presyo|amount|total|subtotal|halaga)[\s:]*[₱P]?\s*([\d,]{1,7}(?:\.\d{2})?)',
+    caseSensitive: false,
+  );
+
+  // Priority 3 — ₱ or P + whole number (no decimals)
+  // e.g. ₱85 | P 150
+  final p3 = RegExp(r'[₱P]\s*(\d{1,6})(?!\d|\.)', caseSensitive: false);
+
+  // Priority 4 — number followed by peso/php suffix
+  // e.g. 85 pesos | 75 php
+  final p4 = RegExp(
+    r'(\d{1,6}(?:\.\d{2})?)\s*(?:pesos?|php)',
+    caseSensitive: false,
+  );
+
+  // Priority 5 — LAST RESORT: standalone decimal number
+  // e.g. 85.00 — risky, only use if nothing else matched
+  final p5 = RegExp(r'\b(\d{1,4}\.\d{2})\b');
+
+  for (final pattern in [p1, p2, p3, p4, p5]) {
+    for (final line in cleanLines) {
+      final match = pattern.firstMatch(line);
+      if (match != null) {
+        final raw = normalizeDecimal(match.group(1)!.replaceAll(',', ''));
+        final val = double.tryParse(raw);
+        if (val != null && isValidPrice(val)) {
+          extractedPrice = val.toStringAsFixed(2);
+          break;
+        }
+      }
+    }
+    if (extractedPrice != null) break;
+  }
+
+  // ----------------------------------------------------------
+  // STEP 2: PRODUCT NAME EXTRACTION (expanded for PH market)
+  // ----------------------------------------------------------
+
+  // Store names and receipt noise to skip entirely
+  const skipKeywords = [
+    // PH supermarkets
+    'puregold', 'sm supermarket', 'sm market', 'sm hypermarket',
+    'robinsons', 'landers', 'savemore', 'waltermart', 'shopwise',
+    'alfamart', 'ministop', '7-eleven', 'family mart', 'lawson',
+    'hypermarket', 'supermarket', 'palengke',
+    // Receipt terms
+    'price', 'presyo', 'amount', 'total', 'subtotal', 'change',
+    'cash', 'thank you', 'receipt', 'resibo', 'date', 'time',
+    'cashier', 'tin', 'vat', 'tax', 'discount', 'sale', 'promo',
+    'member', 'card', 'branch', 'store', 'address', 'tel',
+    'phone', 'website', 'www', 'transaction', 'ref no',
+  ];
+
+  // Product words that boost score — expanded for PH grocery
+  const productWords = [
+    // English grocery basics
+    'milk', 'bread', 'rice', 'egg', 'eggs', 'chicken', 'pork', 'beef',
+    'fish', 'oil', 'sugar', 'salt', 'coffee', 'tea', 'juice', 'water',
+    'butter', 'cheese', 'flour', 'vinegar', 'sauce', 'noodles', 'pasta',
+    'tuna', 'sardines', 'canned', 'frozen', 'fresh', 'organic',
+    'instant', 'dried', 'powder', 'condensed', 'evaporated',
+    'shampoo', 'soap', 'detergent', 'lotion', 'toothpaste',
+    // Filipino food terms
+    'bawang', 'sibuyas', 'kamatis', 'gata', 'bagoong', 'patis',
+    'suka', 'toyo', 'asin', 'asukal', 'bigas', 'itlog', 'manok',
+    'baboy', 'baka', 'isda', 'bangus', 'tilapia', 'galunggong',
+    'liempo', 'lechon', 'longganisa', 'tocino', 'tapa',
+    'pandesal', 'hopia', 'polvoron', 'bibingka',
+    // PH brands (partial — boosts if line contains these)
+    'datu', 'century', 'del monte', 'ufc', 'mama sita', 'mamasita',
+    'ajinomoto', 'maggi', 'knorr', 'lucky me', 'payless', 'monde',
+    'rebisco', 'fita', 'skyflakes', 'milo', 'nescafe', 'kopiko',
+    'bear brand', 'alaska', 'magnolia', 'selecta', 'nestea',
+    'c2', 'zesto', 'grande', 'sunquick', 'tang',
+    'ariel', 'tide', 'surf', 'champion', 'joy', 'domex',
+    'safeguard', 'palmolive', 'head shoulders', 'pantene',
+    'colgate', 'closeup', 'hapee',
+  ];
+
+  // Patterns that disqualify a line as a product name
+  final barcodePattern = RegExp(r'\d{12,}');
+  final datePattern = RegExp(r'\d{1,2}[/\-]\d{1,2}[/\-]\d{2,4}');
+  final pureDigitPattern = RegExp(r'^\d+$');
+  final priceOnlyPattern = RegExp(r'^[₱P\d\s.,]+$');
+
+  String? bestName;
+  int bestScore = -999;
+
+  for (final line in cleanLines) {
+    final lower = line.toLowerCase();
+
+    // Hard skip conditions
+    if (line.length < 3) continue;
+    if (barcodePattern.hasMatch(line)) continue;
+    if (pureDigitPattern.hasMatch(line)) continue;
+    if (priceOnlyPattern.hasMatch(line)) continue;
+    if (datePattern.hasMatch(line)) continue;
+    if (skipKeywords.any((kw) => lower.contains(kw))) continue;
+
+    // Digit ratio check — skip if >60% digits (e.g. "12/25/2024", codes)
+    final digitCount = line.replaceAll(RegExp(r'[^\d]'), '').length;
+    if (line.isNotEmpty && digitCount / line.length > 0.6) continue;
+
+    // --- Scoring ---
+    int score = 0;
+
+    // Weight/volume/unit indicators — strong signal it's a product
+    if (RegExp(
+      r'\b(\d+\s*(?:g|kg|ml|l|oz|lb|pcs|pc|pack|sachet|pouch|can|bottle|box|grams?|liters?|kilos?))\b',
+      caseSensitive: false,
+    ).hasMatch(line)) score += 15;
+
+    // Mixed case = brand/product name pattern
+    if (RegExp(r'[A-Z][a-z]+').hasMatch(line)) score += 5;
+
+    // Reasonable product name length (8–60 chars is ideal)
+    if (line.length >= 8 && line.length <= 60) score += 5;
+    if (line.length < 8) score -= 3;
+    if (line.length > 80) score -= 5;
+
+    // Contains product keywords (any match = bonus)
+    if (productWords.any((w) => lower.contains(w))) score += 10;
+
+    // ALL CAPS short line — likely a label/header, slight penalty
+    if (line == line.toUpperCase() && line.length < 20) score -= 3;
+
+    // Has dots — brand name pattern (e.g. "S&W", "C2")
+    if (line.contains('.') && !priceOnlyPattern.hasMatch(line)) score += 2;
+
+    // Starts with capital — good sign
+    if (RegExp(r'^[A-Z]').hasMatch(line)) score += 3;
+
+    if (score > bestScore) {
+      bestScore = score;
+      bestName = line;
+    }
+  }
+
+  // ----------------------------------------------------------
+  // STEP 3: CLEAN UP NAME
+  // ----------------------------------------------------------
+
+  if (bestName != null) {
+    // Remove trailing price patterns
+    bestName = bestName
+        .replaceAll(RegExp(r'\s*[₱P]\s*\d+[.,]?\d*\s*$'), '')
+        .replaceAll(RegExp(r'\s*\d+\.\d{2}\s*$'), '')
+        // Remove leading/trailing non-word characters
+        .replaceAll(RegExp(r'^[^\w₱]+|[^\w₱]+$'), '')
+        .trim();
+
+    if (bestName.isEmpty) bestName = null;
+  }
+
+  // ----------------------------------------------------------
+  // RETURN
+  // ----------------------------------------------------------
+
+  return {
+    'name': bestName ?? 'Unknown Product',
+    'price': extractedPrice ?? '0',
+  };
+}

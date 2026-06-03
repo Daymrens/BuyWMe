@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_picker/image_picker.dart';
 import '../../providers/shopping_list_provider.dart';
 import '../../models/shopping_list.dart';
 import '../../widgets/glassmorphic_card.dart';
@@ -388,54 +387,68 @@ class HomeScreen extends ConsumerWidget {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (context) => GlassmorphicCard(
-        borderRadius: 30,
-        margin: EdgeInsets.zero,
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(2),
+      isScrollControlled: true,
+      builder: (context) => Container(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.7,
+        ),
+        child: Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom + 
+                    MediaQuery.of(context).padding.bottom + 80, // Account for bottom nav
+          ),
+          child: GlassmorphicCard(
+            borderRadius: 30,
+            margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+            padding: const EdgeInsets.all(24),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Quick Scan',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Select a cart to add scanned items',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                  const SizedBox(height: 20),
+                  ...lists.take(5).map((list) => ListTile(
+                    leading: Container(
+                      width: 45,
+                      height: 45,
+                      decoration: BoxDecoration(
+                        gradient: AppTheme.primaryGradient,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(Icons.shopping_bag, color: Colors.white, size: 22),
+                    ),
+                    title: Text(list.name),
+                    subtitle: Text('${list.items.length} items'),
+                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                    onTap: () {
+                      Navigator.pop(context);
+                      _startQuickScan(context, list.id);
+                    },
+                  )),
+                  const SizedBox(height: 16),
+                ],
               ),
             ),
-            const SizedBox(height: 20),
-            Text(
-              'Quick Scan',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Select a cart to add scanned items',
-              style: TextStyle(color: Colors.grey),
-            ),
-            const SizedBox(height: 20),
-            ...lists.take(5).map((list) => ListTile(
-              leading: Container(
-                width: 45,
-                height: 45,
-                decoration: BoxDecoration(
-                  gradient: AppTheme.primaryGradient,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(Icons.shopping_bag, color: Colors.white, size: 22),
-              ),
-              title: Text(list.name),
-              subtitle: Text('${list.items.length} items'),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: () {
-                Navigator.pop(context);
-                _startQuickScan(context, list.id);
-              },
-            )),
-            const SizedBox(height: 8),
-          ],
+          ),
         ),
       ),
     );
@@ -444,36 +457,36 @@ class HomeScreen extends ConsumerWidget {
   void _startQuickScan(BuildContext context, String cartId) async {
     HapticFeedback.mediumImpact();
     
-    final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(
-      source: ImageSource.camera,
-      imageQuality: 85,
-    );
+    // Navigate to cart detail screen
+    context.push('/cart/$cartId');
     
-    if (image != null && context.mounted) {
+    // Show helpful message
+    await Future.delayed(const Duration(milliseconds: 800));
+    
+    if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Row(
+        SnackBar(
+          content: const Row(
             children: [
-              SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Colors.white,
+              Icon(Icons.camera_alt, color: Colors.white, size: 20),
+              SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Tap the + button below to scan a receipt',
+                  style: TextStyle(fontSize: 14),
                 ),
               ),
-              SizedBox(width: 12),
-              Text('Processing image...'),
             ],
           ),
-          backgroundColor: Colors.purple,
-          duration: Duration(seconds: 2),
+          backgroundColor: AppTheme.primaryGreen,
+          duration: const Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          margin: const EdgeInsets.only(bottom: 80, left: 16, right: 16),
         ),
       );
-      
-      // Navigate to cart with the image
-      context.go('/cart/$cartId');
     }
   }
 

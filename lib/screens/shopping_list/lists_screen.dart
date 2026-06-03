@@ -43,7 +43,7 @@ class ListsScreen extends ConsumerWidget {
             backgroundColor: Colors.transparent,
             actions: [
               Padding(
-                padding: const EdgeInsets.only(right: 16, bottom: 50),
+                padding: const EdgeInsets.only(right: 16),
                 child: FloatingActionButton.extended(
                   onPressed: () {
                     HapticFeedback.mediumImpact();

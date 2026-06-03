@@ -623,7 +623,7 @@ class _AddItemCardSheetState extends ConsumerState<AddItemCardSheet>
             const SizedBox(width: 12),
             Expanded(
               child: DropdownButtonFormField<String>(
-                value: _selectedUnit,
+                initialValue: _selectedUnit,
                 decoration: InputDecoration(
                   labelText: 'Unit',
                   border: OutlineInputBorder(

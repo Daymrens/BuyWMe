@@ -542,7 +542,7 @@ class _SimpleAddItemSheetState extends ConsumerState<SimpleAddItemSheet> {
             Expanded(
               flex: 3,
               child: DropdownButtonFormField<String>(
-                value: _selectedUnit,
+                initialValue: _selectedUnit,
                 decoration: InputDecoration(
                   labelText: 'Unit',
                   prefixIcon: const Icon(Icons.straighten),

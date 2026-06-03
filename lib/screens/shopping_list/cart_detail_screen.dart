@@ -48,7 +48,7 @@ class CartDetailScreen extends ConsumerWidget {
       );
     }
     final cart = cartMatches.first;
-    final currencyFormat = NumberFormat.currency(locale: 'en_PH', symbol: '?');
+    final currencyFormat = NumberFormat.currency(locale: 'en_PH', symbol: '₱');
     
     final total = cart.items.fold<double>(
       0,
@@ -511,7 +511,7 @@ class CartDetailScreen extends ConsumerWidget {
                               ),
                             ),
                             Text(
-                              '?${(stockItem['price'] as double).toStringAsFixed(2)}',
+                              '₱${(stockItem['price'] as double).toStringAsFixed(2)}',
                               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                     fontWeight: FontWeight.w700,
                                   ),
@@ -739,7 +739,7 @@ class CartDetailScreen extends ConsumerWidget {
 
 
   void _shareCartAsText(BuildContext context, dynamic cart) {
-    final currencyFormat = NumberFormat.currency(locale: 'en_PH', symbol: '?');
+    final currencyFormat = NumberFormat.currency(locale: 'en_PH', symbol: '₱');
     final total = cart.items.fold<double>(
         0, (sum, item) => sum + (item.estimatedPrice * item.quantity));
 
@@ -831,7 +831,7 @@ class CartDetailScreen extends ConsumerWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: DropdownButtonFormField<String>(
-                      value: selectedUnit,
+                      initialValue: selectedUnit,
                       decoration: const InputDecoration(
                         labelText: 'Unit',
                         border: OutlineInputBorder(),
@@ -852,8 +852,8 @@ class CartDetailScreen extends ConsumerWidget {
               TextField(
                 controller: priceController,
                 decoration: const InputDecoration(
-                  labelText: 'Price (?)',
-                  prefixText: '? ',
+                  labelText: 'Price (₱)',
+                  prefixText: '₱ ',
                   border: OutlineInputBorder(),
                 ),
                 keyboardType: TextInputType.number,
@@ -1046,7 +1046,7 @@ class CartDetailScreen extends ConsumerWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: DropdownButtonFormField<String>(
-                      value: selectedUnit,
+                      initialValue: selectedUnit,
                       decoration: const InputDecoration(
                         labelText: 'Unit',
                         border: OutlineInputBorder(),
@@ -1070,8 +1070,8 @@ class CartDetailScreen extends ConsumerWidget {
               TextField(
                 controller: priceController,
                 decoration: const InputDecoration(
-                  labelText: 'Price (?)',
-                  prefixText: '? ',
+                  labelText: 'Price (₱)',
+                  prefixText: '₱ ',
                   border: OutlineInputBorder(),
                   helperText: 'Edit if needed',
                 ),
@@ -1162,29 +1162,82 @@ class CartDetailScreen extends ConsumerWidget {
                   ),
                 );
 
+                // Capture the parent context and ref before showing the next dialog
+                final parentContext = context;
+                final parentRef = ref;
+                final parentCartId = cartId;
+
                 // Show dialog to choose next action
                 showDialog(
                   context: context,
                   barrierDismissible: false,
-                  builder: (context) => AlertDialog(
-                    title: const Text('Item Added'),
-                    content: const Text('What would you like to do next?'),
+                  builder: (dialogContext) => AlertDialog(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    title: Row(
+                      children: [
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: AppTheme.primaryGreen.withValues(alpha: 0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.check_circle,
+                            color: AppTheme.primaryGreen,
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        const Expanded(child: Text('Item Added')),
+                      ],
+                    ),
+                    content: const Text(
+                      'What would you like to do next?',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                    actionsAlignment: MainAxisAlignment.spaceBetween,
+                    actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                     actions: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                          // Open scan receipt again to add another item
-                          _showImageCapture(context, ref, cartId);
+                      OutlinedButton(
+                        onPressed: () async {
+                          Navigator.pop(dialogContext);
+                          // Wait for dialog to close completely, then open camera
+                          await Future.delayed(const Duration(milliseconds: 300));
+                          if (parentContext.mounted) {
+                            _showImageCapture(parentContext, parentRef, parentCartId);
+                          }
                         },
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppTheme.primaryGreen,
+                          side: const BorderSide(color: AppTheme.primaryGreen),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 12,
+                          ),
+                        ),
                         child: const Text('Add Another'),
                       ),
                       ElevatedButton(
                         onPressed: () {
-                          Navigator.pop(context);
+                          Navigator.pop(dialogContext);
                           // Stay on cart screen (already there)
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppTheme.primaryGreen,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 12,
+                          ),
                         ),
                         child: const Text('Go to Cart'),
                       ),
@@ -1446,7 +1499,7 @@ Extract ONLY:
 
 Rules:
 - Product name: be specific, include brand and variant if visible (e.g. "Alaska Evaporated Milk 370ml" not just "Milk")
-- Price: numeric value only, no currency symbols (e.g. "85.00" not "?85.00")
+- Price: numeric value only, no currency symbols (e.g. "85.00" not "P85.00")
 - If you see multiple prices (original + sale), use the SALE/CURRENT price
 - If you cannot clearly read the name or price, use "unknown"
 
