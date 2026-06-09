@@ -1,0 +1,9 @@
+name: buywme_lints
+description: Custom lint rules for BuyWMe
+version: 1.0.0
+
+dependencies:
+  custom_lint:
+  analyzer_plugin:
+  analyzer:
+  riverpod_analyzer:

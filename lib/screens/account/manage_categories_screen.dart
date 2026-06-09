@@ -462,7 +462,7 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
-                initialValue: selectedUnit,
+                value: selectedUnit,
                 decoration: const InputDecoration(
                   labelText: 'Unit',
                   border: OutlineInputBorder(),
@@ -588,7 +588,7 @@ class _ManageCategoriesScreenState extends State<ManageCategoriesScreen> {
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
-                initialValue: selectedUnit,
+                value: selectedUnit,
                 decoration: const InputDecoration(
                   labelText: 'Unit',
                   border: OutlineInputBorder(),

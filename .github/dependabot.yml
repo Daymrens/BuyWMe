@@ -1,0 +1,50 @@
+version: 2
+updates:
+  - package-ecosystem: "pub"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "flutter"
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      flutter-sdk:
+        patterns:
+          - "flutter*"
+      riverpod:
+        patterns:
+          - "riverpod*"
+          - "flutter_riverpod*"
+      google:
+        patterns:
+          - "google*"
+      ui:
+        patterns:
+          - "lottie*"
+          - "shimmer*"
+          - "flutter_animate*"
+          - "google_fonts*"
+      storage:
+        patterns:
+          - "hive*"
+          - "shared_preferences*"
+      scanning:
+        patterns:
+          - "mobile_scanner*"
+          - "google_mlkit*"
+          - "image_picker*"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    labels:
+      - "dependencies"
+      - "github-actions"

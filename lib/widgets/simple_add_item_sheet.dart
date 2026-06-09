@@ -6,6 +6,7 @@ import 'package:uuid/uuid.dart';
 import '../models/shopping_item.dart';
 import '../providers/shopping_list_provider.dart';
 import '../providers/favorite_provider.dart';
+import '../providers/autocomplete_provider.dart';
 import '../theme/app_theme.dart';
 
 /// Simple, user-friendly Add Item bottom sheet
@@ -37,6 +38,10 @@ class _SimpleAddItemSheetState extends ConsumerState<SimpleAddItemSheet> {
   String _selectedUnit = 'pcs';
   bool _addToFavorites = false;
 
+  // Autocomplete state
+  late FocusNode _nameFocusNode;
+  bool _showSuggestions = false;
+
   // Common items for quick add
   final Map<String, List<Map<String, dynamic>>> _commonItems = {
     'All': [
@@ -64,10 +69,40 @@ class _SimpleAddItemSheetState extends ConsumerState<SimpleAddItemSheet> {
   String _selectedCategory = 'All';
 
   @override
+  void initState() {
+    super.initState();
+    _nameFocusNode = FocusNode();
+    _nameController.addListener(_onNameChanged);
+    _nameFocusNode.addListener(_onFocusChanged);
+  }
+
+  void _onFocusChanged() {
+    if (!_nameFocusNode.hasFocus) {
+      setState(() => _showSuggestions = false);
+    }
+  }
+
+  void _onNameChanged() {
+    if (_nameFocusNode.hasFocus && _nameController.text.isNotEmpty) {
+      setState(() => _showSuggestions = true);
+    } else {
+      setState(() => _showSuggestions = false);
+    }
+  }
+
+  void _selectSuggestion(String suggestion) {
+    _nameController.text = suggestion;
+    setState(() => _showSuggestions = false);
+  }
+
+  @override
   void dispose() {
+    _nameController.removeListener(_onNameChanged);
     _nameController.dispose();
     _quantityController.dispose();
     _priceController.dispose();
+    _nameFocusNode.removeListener(_onFocusChanged);
+    _nameFocusNode.dispose();
     super.dispose();
   }
 
@@ -497,23 +532,8 @@ class _SimpleAddItemSheetState extends ConsumerState<SimpleAddItemSheet> {
       controller: scrollController,
       padding: const EdgeInsets.all(20),
       children: [
-        // Product Name
-        TextField(
-          controller: _nameController,
-          textCapitalization: TextCapitalization.words,
-          decoration: InputDecoration(
-            labelText: 'Product Name',
-            hintText: 'e.g., Rice, Milk, Eggs',
-            prefixIcon: const Icon(Icons.shopping_basket),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            filled: true,
-            fillColor: Theme.of(context).brightness == Brightness.dark
-                ? Colors.white.withValues(alpha: 0.05)
-                : Colors.grey.withValues(alpha: 0.1),
-          ),
-        ).animate().fadeIn(delay: 50.ms).slideY(begin: 0.1),
+        // Product Name with autocomplete
+        _buildNameFieldWithAutocomplete().animate().fadeIn(delay: 50.ms).slideY(begin: 0.1),
         
         const SizedBox(height: 16),
         
@@ -542,7 +562,7 @@ class _SimpleAddItemSheetState extends ConsumerState<SimpleAddItemSheet> {
             Expanded(
               flex: 3,
               child: DropdownButtonFormField<String>(
-                initialValue: _selectedUnit,
+                value: _selectedUnit,
                 decoration: InputDecoration(
                   labelText: 'Unit',
                   prefixIcon: const Icon(Icons.straighten),
@@ -653,6 +673,131 @@ class _SimpleAddItemSheetState extends ConsumerState<SimpleAddItemSheet> {
     );
   }
 
+  Widget _buildNameFieldWithAutocomplete() {
+    return Consumer(
+      builder: (context, ref, child) {
+        final suggestions = ref.watch(suggestionsProvider);
+
+        return Stack(
+          children: [
+            TextField(
+              controller: _nameController,
+              focusNode: _nameFocusNode,
+              textCapitalization: TextCapitalization.words,
+              decoration: InputDecoration(
+                labelText: 'Product Name',
+                hintText: 'e.g., Rice, Milk, Eggs',
+                prefixIcon: const Icon(Icons.shopping_basket),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                filled: true,
+                fillColor: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white.withValues(alpha: 0.05)
+                    : Colors.grey.withValues(alpha: 0.1),
+              ),
+              onChanged: (value) {
+                ref.read(suggestionsProvider.notifier).updateSuggestions(value);
+              },
+            ),
+
+            if (_showSuggestions && suggestions.isNotEmpty)
+              Positioned(
+                top: 60,
+                left: 0,
+                right: 0,
+                child: Material(
+                  elevation: 8,
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    constraints: const BoxConstraints(maxHeight: 200),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.grey[900]
+                          : Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: AppTheme.primaryGreen.withValues(alpha: 0.3),
+                        width: 1,
+                      ),
+                    ),
+                    child: ListView.builder(
+                      padding: EdgeInsets.zero,
+                      shrinkWrap: true,
+                      itemCount: suggestions.length,
+                      itemBuilder: (context, index) {
+                        final suggestion = suggestions[index];
+                        final frequency = ref
+                            .read(suggestionsProvider.notifier)
+                            .getFrequency(suggestion);
+
+                        return InkWell(
+                          onTap: () => _selectSuggestion(suggestion),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
+                            decoration: BoxDecoration(
+                              border: index < suggestions.length - 1
+                                  ? Border(
+                                      bottom: BorderSide(
+                                        color: Colors.grey.withValues(alpha: 0.2),
+                                        width: 0.5,
+                                      ),
+                                    )
+                                  : null,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    suggestion,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                      color: Theme.of(context).brightness == Brightness.dark
+                                          ? Colors.white
+                                          : Colors.black87,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                if (frequency > 0)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: AppTheme.primaryGreen.withValues(alpha: 0.2),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Text(
+                                      '×$frequency',
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: AppTheme.primaryGreen,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+
   void _addQuickItem(Map<String, dynamic> item) {
     final newItem = ShoppingItem(
       id: const Uuid().v4(),
@@ -739,6 +884,7 @@ class _SimpleAddItemSheetState extends ConsumerState<SimpleAddItemSheet> {
     );
     
     ref.read(shoppingListProvider.notifier).addItem(widget.cartId, newItem);
+    ref.read(suggestionsProvider.notifier).refreshIndex();
     
     // Add to favorites if requested
     if (_addToFavorites) {
